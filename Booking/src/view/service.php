@@ -1,0 +1,180 @@
+<?php
+include_once "../routes/routes.php";
+?>
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý dịch vụ</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<style>
+    table {
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid #FFD700;
+            margin-top: 24px;
+            margin-bottom: 24px;
+        }
+
+        th,
+        td {
+            color: #959dcc;
+            text-align: center;
+            padding: 8px;
+            border: 1px solid #FFD700;
+        }
+        h1.h2,h3{
+            color: #959dcc;
+            margin-top: 24px;
+            margin-bottom: 24px;
+        }
+        h1 {
+            text-align: center;
+        }
+
+        input[type=text],
+        input[type=number],
+        select {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input[type=submit] {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        input[type=submit]:hover {
+            background-color: #45a049;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            
+        }
+
+</style>
+<body>
+<div id="main">
+    <div class="" style="background: linear-gradient(to right,rgba(27,31,52,0.8),rgba(27,31,52,0.8))">
+        <button id="openNav" class="w3-button w3-xlarge" style="background: #FFD700; border: 1px solid #FFD700" onclick="w3_open()">&#9776;</button>
+        <div class="w3-container" onclick="w3_close()">
+            <h1 style="color:white; text-align:center; ">Chào mừng bạn đến với trang quản lý đặt lịch</h1>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center"><h3>Quản lý dịch vụ</h3></div>
+            <div class="col-12">
+        
+                <button class="btn btn-primary mb-3" onclick="$('#addServiceModal').modal('show')">Thêm dịch vụ</button>
+
+                <!-- Danh sách dịch vụ -->
+                <table class="table table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                        <th>ID</th>
+                        <th>Tên dịch vụ</th>
+                        <th>Giá</th>
+                        <th>Thời gian</th>
+                        <th>Mô tả</th>
+                        <th>Ảnh</th>
+                        <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <?php foreach ($services as $service): ?>
+                    <tr>
+                        <td><?= $service['id'] ?></td>
+                        <td><?= $service['name'] ?></td>
+                        <td><?= number_format($service['price']) ?> VND</td>
+                        <td><?= $service['duration'] ?> phút</td>
+                        <td><?= $service['description'] ?></td>
+                        <td><img src="<?= $service['service_image'] ?>" alt="Ảnh dịch vụ" width="50"></td>
+                        <td>
+                        <button type="button" class="btn btn-warning btn-edit edit-service"
+                            data-id="<?= $service['id'] ?>"
+                            data-name="<?= $service['name'] ?>"
+                            data-price="<?= $service['price'] ?>"
+                            data-duration="<?= $service['duration'] ?>"
+                            data-description="<?= htmlspecialchars($service['description']) ?>"
+                            data-image="<?= $service['service_image'] ?>">
+                            <i class="fas fa-cog fa-lg"></i>
+                        </button>
+                            <button type="button" class="btn btn-danger btn-delete delete-service" data-id="<?= $service['id'] ?>"><i class="fas fa-trash-alt" style="color: white;"></i></button>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal để thêm dịch vụ -->
+<div id="addServiceModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm dịch vụ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/view/admin.php?action=addService" method="POST">
+                    <input type="text" name="name" class="form-control mb-2" placeholder="Tên dịch vụ">
+                    <input type="number" name="price" class="form-control mb-2" placeholder="Giá">
+                    <input type="number" name="duration" class="form-control mb-2" placeholder="Thời gian (phút)">
+                    <textarea name="description" class="form-control mb-2" placeholder="Mô tả"></textarea>
+                    <input type="text" name="image" class="form-control mb-2" placeholder="Link ảnh">
+                    <button type="submit" class="btn btn-success">Thêm</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal để chỉnh sửa dịch vụ -->
+<div id="editServiceModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chỉnh sửa dịch vụ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/view/admin.php?action=updateService" method="POST">
+                    <input type="hidden" name="id" id="editServiceId">
+                    <input type="text" name="name" id="editServiceName" class="form-control mb-2" placeholder="Tên dịch vụ">
+                    <input type="number" name="price" id="editServicePrice" class="form-control mb-2" placeholder="Giá">
+                    <input type="number" name="duration" id="editServiceDuration" class="form-control mb-2" placeholder="Thời gian (phút)">
+                    <textarea name="description" id="editServiceDescription" class="form-control mb-2" placeholder="Mô tả"></textarea>
+                    <input type="text" name="image" id="editServiceImage" class="form-control mb-2" placeholder="Link ảnh">
+                    <button type="submit" class="btn btn-success">Lưu thay đổi</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    
+
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
