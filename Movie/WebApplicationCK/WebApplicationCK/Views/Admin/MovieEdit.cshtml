@@ -1,0 +1,221 @@
+﻿@model WebApplicationCK.Models.MovieViewModel
+@{
+    ViewData["Title"] = "MovieEdit";
+}
+<span style="font-family: verdana, geneva, sans-serif;">
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Admin Dashboard | By Code Info</title>
+        <link rel="stylesheet" href="~/css/style3.css">
+        <script language="javascript" src="ALL.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Latest compiled JavaScript -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    </head>
+    <body>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="slide-bar">
+                        <div class="slide-bar-start">
+                            <a href="~/Admin/Movie">Movies</a>
+                            <a href="~/Admin/Ep">Episodes</a>
+                            <a href="~/Admin/user">Users</a>
+                        </div>
+                        <div class="slide-bar-end">
+                            <a href="/Home/Main">Trang chủ</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-10">
+                    <div class="title">
+                        <H1>Movie</H1>
+                    </div>
+                    <div class="content">
+                        <div class="search">
+                            @using (Html.BeginForm("Movie", "Admin", FormMethod.Get))
+                            {
+                                <div class="list-search">
+                                    <span>Tên phim:</span>
+                                    <input type="text" placeholder="Tên phim" class="form-control" name="searchfilm">
+                                </div>
+
+                                <div class="list-search">
+                                    <label for="filter-category">Thể loại</label>
+                                    <select class="form-control" id="filter-category" name="genres">
+                                        <option value="null">Thể loại</option>
+                                        <option value="Hành Động">Hành động</option>
+                                        <option value="Phiêu Lưu">Phiêu lưu</option>
+                                        <option value="Kinh Dị">Kinh dị</option>
+                                        <option value="Hài Kịch">Hài kịch</option>
+                                        <option value="Tình Cảm">Tình cảm</option>
+                                        <option value="Khoa Học">Khoa học</option>
+                                        <option value="Viễn Tưởng">Viễn tưởng</option>
+                                        <option value="Hoạt Hình">Hoạt hình</option>
+                                        <option value="Giả Tưởng">Giả tưởng</option>
+                                        <option value="Gia Đình">Gia đình</option>
+                                        <option value="Tội Phạm">Tội phạm</option>
+                                        <option value="Drama">Drama</option>
+                                        <option value="Kỳ Ảo">Kỳ ảo</option>
+                                        <option value="Lịch Sử">Lịch sử</option>
+                                        <option value="Chiến Tranh">Chiến tranh</option>
+                                        <option value="Tâm Lý">Tâm lý</option>
+                                        <option value="Thần Thoại">Thần thoại</option>
+                                        <option value="Thể Thao">Thể thao</option>
+                                        <option value="Mạo Hiểm">Mạo hiểm</option>
+                                        <option value="Nghệ Thuật">Nghệ thuật</option>
+                                    </select>
+                                </div>
+                                <div class="list-search">
+                                    <label for="filter-year">Năm phát hành</label>
+                                    <select id="filter-year" name="year" class="form-control">
+                                        <option value="null">Tất cả</option>
+                                        <option value="2023">2023</option>
+                                        <option value="2022">2022</option>
+                                        <option value="2021">2021</option>
+                                        <option value="2020">2020</option>
+                                        <option value="2019">2019</option>
+                                        <option value="2018">2018</option>
+                                        <option value="2017">2017</option>
+                                        <option value="2016">2016</option>
+                                        <option value="2015">2015</option>
+                                        <option value="2014">2014</option>
+                                        <option value="2013">2013</option>
+                                        <option value="2012">2012</option>
+                                        <option value="2011">2011</option>
+                                        <option value="2010">2010</option>
+                                    </select>
+                                </div>
+                                <button type="submit" id="btn-movie-filter" class="btn btn-dark btn-filter-movie"><span>Áp dụng</span></button>
+                            }
+                        </div>
+                    </div>
+                    <hr>
+                    <button class="btn btn-success"><i class="fa-solid fa-plus"></i></button>
+                    <div class="content">
+                        <p style="color:red;">@ViewBag.ErrorMessage</p>
+                        <table border="1">
+                            <colgroup>
+                                <col style="width: 5%">
+                                <col style="width: 10%">
+                                <col style="width: 15%">
+                                <col style="width: 10%">
+                                <col style="width: 5%">
+                                <col style="width: 10%">
+                                <col style="width: 10%">
+                                <col style="width: 10%">
+                                <col style="width: 10%">
+                                <col style="width: 10%">
+                                <col style="width: 5%">
+                                <col style="width: 5%">
+                                <col style="width: 5%">
+                            </colgroup>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Genre</th>
+                                <th>Total Ep</th>
+                                <th>Director</th>
+                                <th>Poster</th>
+                                <th>Trailer</th>
+                                <th>Nation</th>
+                                <th>Release Date</th>
+                                <th>Rating</th>
+                                <th>Total View</th>
+                                <th></th>
+                            </tr>
+                            @using (Html.BeginForm("MovieEdit", "Admin", FormMethod.Post))
+                            {
+                                <tr>
+                                    <td><input type="text" readonly id="MovieId" name="MovieId" value="@Model.Movie.MovieId"></td>
+                                    <td><input type="text" id="Title" name="Title" value="@Model.Movie.Title"></td>
+                                    <td><input type="text" id="Description" name="Description" value="@Model.Movie.Description"></td>
+                                    <td><input type="text" id="Genre" name="Genre" value="@Model.Movie.Genre"></td>
+                                    <td><input type="text" id="TotalEpisode" name="TotalEpisode" value="@Model.Movie.TotalEpisode"></td>
+                                    <td><input type="text" id="Director" name="Director" value="@Model.Movie.Director"></td>
+                                    <td><input type="text" id="Poster" name="Poster" value="@Model.Movie.Poster"></td>
+                                    <td><input type="text" name="Trailer" id="Trailer" value="@Model.Movie.Trailer"></td>
+                                    <td><input type="text" name="Nation" id="Nation" value="@Model.Movie.Nation"></td>
+                                    <td><input type="text" name="ReleaseDate" id="ReleaseDate" value="@Model.Movie.ReleaseDate"></td>
+                                    <td><input type="text" name="Rating" id="Rating" value="@Model.Movie.Rating"></td>
+                                    <td><input type="text" name="TotalView" id="TotalView" value="@Model.Movie.TotalView"></td>
+                                    <td><button class="btn btn-success" type="submit"><i class="fa-solid fa-pen-nib"></i></button></td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+                    <hr>
+                    <div class="content">
+                        <table border="1">
+                            <colgroup>
+                                <col style="width: 5%">
+                                <col style="width: 10%">
+                                <col style="width: 15%">
+                                <col style="width: 10%">
+                                <col style="width: 5%">
+                                <col style="width: 10%">
+                                <col style="width: 11%">
+                                <col style="width: 10%">
+                                <col style="width: 10%">
+                                <col style="width: 9%">
+                                <col style="width: 5%">
+                                <col style="width: 5%">
+                                <col style="width: 5%">
+                            </colgroup>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Genre</th>
+                                <th>Total Ep</th>
+                                <th>Director</th>
+                                <th>Poster</th>
+                                <th>Trailer</th>
+                                <th>Nation</th>
+                                <th>Release Date</th>
+                                <th>Rating</th>
+                                <th>Total View</th>
+                                <th></th>
+                            </tr>
+                            @foreach (var item in Model.MovieList)
+                            {
+                                <tr>
+                                    <td><div class="listdtb">@item.MovieId</div></td>
+                                    <td><div class="listdtb">@item.Title</div></td>
+                                    <td><div class="listdtb">@item.Description</div></td>
+                                    <td><div class="listdtb">@item.Genre</div></td>
+                                    <td><div class="listdtb">@item.TotalEpisode</div></td>
+                                    <td><div class="listdtb">@item.Director</div></td>
+                                    <td><div class="listdtb">@item.Poster</div></td>
+                                    <td><div class="listdtb">@item.Trailer</div></td>
+                                    <td><div class="listdtb">@item.Nation</div></td>
+                                    <td><div class="listdtb">@item.ReleaseDate</div></td>
+                                    <td><div class="listdtb">@item.Rating</div></td>
+                                    <td><div class="listdtb">@item.TotalView</div></td>
+                                    <td>
+                                        <a href="@Url.Action("MovieEdit", "Admin", new { id = item.MovieId })">
+                                            <button class="btn btn-danger"><i class="fa-solid fa-pen-nib"></i></button>
+                                        </a>
+                                        @using (Html.BeginForm("Delete", "Admin", new { id = item.MovieId }, FormMethod.Post))
+                                        {
+                                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-trash-can"></i></button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                            <form action="">
+                            </form>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+</span>
+

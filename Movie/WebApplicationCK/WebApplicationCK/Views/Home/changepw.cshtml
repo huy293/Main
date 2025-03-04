@@ -1,0 +1,320 @@
+ @model IEnumerable<WebApplicationCK.Models.Movie>
+@{
+    var httpContext = Context.Request.HttpContext;
+    string id1 = httpContext.Session.GetString("Userid");
+    int id = 0;
+    if (id1 != null)
+    {
+        id = int.Parse(id1);
+    }
+    string username = httpContext.Session.GetString("Username");
+    string status = httpContext.Session.GetString("Userstatus");
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="~/css/style.css">
+    <link rel="stylesheet" href="~/css/style2.css">
+    <script language="javascript" src></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <title>Web Phim .Net</title>
+</head>
+  
+
+<body>
+  <div class="fbody">
+    <nav id="home" class="navbar">
+        <div class="container">
+          <a class="navbar-brand" href="~/Home/Main"><img src="~/img/a.jpg" alt=""></a>
+          <div></div>
+           @using (Html.BeginForm("loc", "Home", FormMethod.Post, new { @class = "d-flex" })){
+                <input class="form-search form-control ms-5 me-2" type="text" placeholder="Search" name="searchfilm">
+                <button class="btn btn-outline-light" type="submit">Search</button>
+           }
+          <div class="dndk">
+                    @if (string.IsNullOrEmpty(username))
+                    {
+                        <input class="btn btn-outline-light openl" id="bt" type="button" value="Login">
+
+                        <input class="btn btn-outline-light opens" id="btn2" type="button" value="Sign Up">
+                    }
+                    else
+                    {
+                        <a href="/Inf/acount">
+                            <img src="~/img/icons8-user-96.png" width="40" height="40">
+                        </a>
+                    }
+          </div> 
+        </div>
+    </nav>        
+    
+    <header>
+      <div class="container">
+          <div class="toolbar">
+              <a href="~/Home/Main">Trang chủ</a>
+              <div class="dropdown-container">
+                <a href="#" onclick="toggleDropdown('genre')">Thể loại</a>
+                <div id="genreDropdown" class="dropdown">
+                    <a href="/Home/loc?genre=Hành Động">Hành động</a>
+                    <a href="/Home/loc?genre=Phiêu Lưu">Phiêu lưu</a>
+                    <a href="/Home/loc?genre=Kinh Dị">Kinh dị</a>
+                    <a href="/Home/loc?genre=Hài Kịch">Hài kịch</a>
+                    <a href="/Home/loc?genre=Tình Cảm">Tình cảm</a>
+                    <a href="/Home/loc?genre=Khoa Học">Khoa học</a>
+                    <a href="/Home/loc?genre=Viễn Tưởng">Viễn tưởng</a>
+                    <a href="/Home/loc?genre=Hoạt Hình">Hoạt hình</a>
+                    <a href="/Home/loc?genre=Giả Tưởng">Giả tưởng</a>
+                    <a href="/Home/loc?genre=Gia Đình">Gia đình</a>
+                    <a href="/Home/loc?genre=Tội Phạm">Tội phạm</a>
+                    <a href="/Home/loc?genre=Drama">Drama</a>
+                    <a href="/Home/loc?genre=Kỳ Ảo">Kỳ ảo</a>
+                    <a href="/Home/loc?genre=Lịch Sử">Lịch sử</a>
+                    <a href="/Home/loc?genre=Chiến Tranh">Chiến tranh</a>
+                    <a href="/Home/loc?genre=Tâm Lý">Tâm lý</a>
+                    <a href="/Home/loc?genre=Thần Thoại">Thần thoại</a>
+                    <a href="/Home/loc?genre=Thể Thao">Thể thao</a>
+                    <a href="/Home/loc?genre=Mạo Hiểm">Mạo hiểm</a>
+                    <a href="/Home/loc?genre=Nghệ Thuật">Nghệ thuật</a>
+                    <a href="/Home/loc?genre=Chính Kịch">Chính Kịch</a>
+                    <a href="/Home/loc?genre=Hình Sự">Hình Sự</a>
+                    <a href="/Home/loc?genre=Bí Ẩn">Bí Ẩn</a>
+                    <a href="/Home/loc?genre=Kịch Tính">Kịch Tính</a>
+                </div>
+              </div>
+              <a href="/Home/loc?type=new">Phim mới</a>
+              <a href="/Home/loc?type=le">Phim lẻ</a>
+              <a href="/Home/loc?type=bo">Phim bộ</a>
+              <a href="/Home/loc?type=view">Xem nhiều</a>
+              <div class="dropdown-container">
+                <a href="#" onclick="toggleDropdown('year')">Năm</a>
+                <div id="yearDropdown" class="dropdown">
+                  <a href="/Home/loc?year=2023">2023</a>
+                  <a href="/Home/loc?year=2022">2022</a>
+                  <a href="/Home/loc?year=2021">2021</a>
+                  <a href="/Home/loc?year=2020">2020</a>
+                  <a href="/Home/loc?year=2019">2019</a>
+                  <a href="/Home/loc?year=2018">2018</a>
+                  <a href="/Home/loc?year=2017">2017</a>
+                  <a href="/Home/loc?year=2016">2016</a>
+                  <a href="/Home/loc?year=2015">2015</a>
+                  <a href="/Home/loc?year=2014">2014</a>
+                  <a href="/Home/loc?year=2013">2013</a>
+                  <a href="/Home/loc?year=2012">2012</a>
+                  <a href="/Home/loc?year=2011">2011</a>
+                  <a href="/Home/loc?year=2010">2010</a>                  
+                </div>
+              </div>
+                    @if (status == "admin")
+                    {
+                        <a href="/Admin/admin">Admin</a>
+                    }
+          </div>
+      </div>
+            <script>
+                function toggleDropdown(dropdownId) {
+                    var dropdown = document.getElementById(dropdownId + 'Dropdown');
+                    dropdown.classList.toggle('show');
+                }
+
+                // Xử lý sự kiện click trên document.body
+                document.body.addEventListener('click', function (event) {
+                    var dropdowns = document.getElementsByClassName('dropdown');
+                    for (var i = 0; i < dropdowns.length; i++) {
+                        var dropdown = dropdowns[i];
+                        if (!dropdown.parentElement.contains(event.target)) {
+                            dropdown.classList.remove('show');
+                        }
+                    }
+                });
+            </script>
+    </header>
+
+  <div id="home" class=container>
+    <ul class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a href="#">Lọc</a></li>
+      </ul>
+    <div class="row">
+      <div class="col-lg-8"style="margin-top: 0px;">
+          @using (Html.BeginForm("changepw", "Admin", FormMethod.Post))
+                    {
+                        <p>Username</p>
+                        <input type="text" name="Username" />
+                        <p>Email</p>
+                        <input type="text" name="Email" />
+                        <p>Change password</p>
+                        <input type="text" name="Password" />
+                        <button class="btn btn-success" type="submit">Change</button>
+                        @ViewBag.ErrorMessage
+                    }
+                </div>
+      <div class="col-lg-4">
+          <div class="listall" style="margin-top: 0px;">
+            <a href="#"><div class="pa-title-item-2" style="margin-top: 0px;">Xem nhiều nhất</div></a>
+                        @foreach (KeyValuePair<WebApplicationCK.Models.Movie, int> item in ViewBag.moviesttv)
+                        {
+                            <div class="content">
+                                <a title="@item.Key.Title" href="@Url.Action("Inf", "Home", new { id = item.Key.MovieId })">
+                                    <span class="status">@item.Value/@item.Key.TotalEpisode</span>
+                                    <div class="list-top-movie-item-thumb" style="background-image: url('@item.Key.Poster')"></div>
+                                    <div class="list-top-movie-item-info">
+                                        <span class="list-top-movie-item-vn">@item.Key.Title</span>
+                                        <span class="list-top-movie-item-view">Lượt xem: @item.Key.TotalView</span>
+                                    </div>
+                                </a>
+                            </div>
+                        }
+          </div>
+          
+      </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+      <div class="row justify-content-between">
+          <div class="col-auto">
+              <p>Copyrights Tổ 5. All Rights reserved</p>
+          </div>
+          <div class="col-auto">
+              <p>Designed by <a href="#">Khang Huy</a></p>
+          </div>
+      </div>
+    </div>
+</footer>
+</div>
+<div id="login" class="bg-img">
+  <div class="contenlogin">
+      <input type="button" class="close" value="X">
+      <script Language="javascript">
+         const btn = document.querySelector('.close');
+         const btno = document.querySelector('.openl');
+         const tat = document.querySelector('.bg-img');
+         const bd = document.querySelector('.fbody');
+         btn.addEventListener('click', function(){
+          tat.style.display="none";
+          bd.style.opacity="1";
+         })
+         btno.addEventListener('click', function(){
+          tat.style.display="block";
+          bd.style.opacity="0.1";
+          bd.style.transition="0.7s";
+         })
+      </script>
+    <header>Login Form</header>
+    @using (Html.BeginForm("loginl", "Home", FormMethod.Post)){
+      <div class="field">
+        <span class="fa fa-user"></span>
+                    <input name="Username" type="text" required placeholder="Username">
+      </div>
+      <div class="field space">
+        <span class="fa fa-lock"></span>
+        <input name="Password" type="password" class="pass-key" required placeholder="Password">
+        <span class="show">SHOW</span>
+      </div>
+      <p style="color:red;">@ViewBag.ErrorMessage </p>
+      <div class="login">
+        <a href="/Home/changepw">Forgot Password?</a>
+      </div>
+      <div class="field">
+        <input type="submit" value="LOGIN">
+      </div>
+    }
+    <div class="signup">Don't have account?
+      <input type="button" class="changes" value="Sign Up">
+    </div>
+  </div>
+</div>
+
+<script>
+  const pass_field = document.querySelector('.pass-key');
+  const showBtn = document.querySelector('.show');
+  showBtn.addEventListener('click', function(){
+   if(pass_field.type === "password"){
+     pass_field.type = "text";
+     showBtn.textContent = "HIDE";
+     showBtn.style.color = "#3498db";
+   }else{
+     pass_field.type = "password";
+     showBtn.textContent = "SHOW";
+     showBtn.style.color = "#222";
+   }
+  });
+</script>
+
+
+<div id="signup" class="bg-img-si">
+  <div class="contensignup">
+      <input type="button" class="closes" value="X">
+      <script Language="javascript">
+          const btn1 = document.querySelector('.closes');
+         const btns = document.querySelector('.opens');
+         const tat1 = document.querySelector('.bg-img-si');
+         btn1.addEventListener('click', function(){
+          tat1.style.display="none";
+          bd.style.opacity="1";
+         })
+         btns.addEventListener('click', function(){
+          tat1.style.display="block";
+          bd.style.opacity="0.1";
+          bd.style.transition="0.7s";
+         })
+      </script>
+    <header>Sign Up Form</header>
+    @using (Html.BeginForm("createaccl", "Home", FormMethod.Post)){
+       <div class="field">
+        <span class="fa fa-user"></span>
+        <input name="Username" type="text" required placeholder="Username">
+      </div>
+      <div class="field space">
+        <span class="fa fa-user"></span>
+        <input name="Firstname" type="text" required placeholder="Firstname">
+        <div class="fieldin"></div>
+        <span class="fa fa-user"></span>
+        <input name="Lastname" type="text" required placeholder="Lastname">
+      </div>
+      <div class="field space">
+        <span class="fa fa-user"></span>
+        <input name="Email" type="text" required placeholder="Email">
+      </div>
+      <div class="field space">
+        <span class="fa fa-lock"></span>
+        <input name="Password" type="password" class="pass-key" required placeholder="Password">
+        <span class="show">SHOW</span>
+      </div>
+      <div class="field space">
+          <span class="fa fa-lock"></span>
+          <input name ="check" type="password" class="pass-key" required placeholder="Confirm Your Password">
+          <span class="show">SHOW</span>
+        </div>
+                <p style="color:red;">@ViewBag.ErrorMessage </p>
+      <div class="field" style="margin: 15px 0px;">
+        <input type="submit" value="SIGN UP">
+      </div>
+    }
+    <div class="signup">Have account?
+          <input type="button" class="changel" value="Login">
+          <script Language="javascript">
+              const btnchangel = document.querySelector('.changel');
+              btnchangel.addEventListener('click', function(){
+              tat1.style.display="none";
+              tat.style.display="block";
+             })
+             const btnchanges = document.querySelector('.changes');
+              btnchanges.addEventListener('click', function(){
+              tat.style.display="none";
+              tat1.style.display="block";
+             })
+          </script>
+    </div>
+  </div>
+</div>
+</body>
+
+</html>

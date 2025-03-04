@@ -1,0 +1,139 @@
+ @model IEnumerable<WebApplicationCK.Models.Episode>
+<span style="font-family: verdana, geneva, sans-serif;"><!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <meta charset="UTF-8" />
+        <title>Admin Dashboard | By Code Info</title>
+        <link rel="stylesheet" href="~/css/style3.css" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <script language="javascript" src="ALL.js"></script>
+        <!-- Latest compiled JavaScript -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+        </head>
+        <body>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="slide-bar">
+                            <div class="slide-bar-start">
+                            <a href="~/Admin/Movie">Movies</a>
+                            <a href="~/Admin/Ep">Episodes</a>
+                            <a href="~/Admin/user">Users</a>
+                            </div>
+                            <div class="slide-bar-end">
+                            <a href="/Home/Main">Trang chủ</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-10">
+                        <div class="title">
+                            <H1>Episode</H1>
+                        </div>
+                        <div class="content">
+                            <div class="search">
+                                @using (Html.BeginForm("Ep", "Admin", FormMethod.Get)){
+                                    <div class="list-search">
+                                        <span>Chọn bộ phim:</span>
+                                        <input type="text" placeholder="Tên phim" class="form-control" name="searchfilm">
+                                    </div>
+                                    <button type="submit" id="btn-movie-filter" class="btn btn-dark btn-filter-movie"><span>Áp dụng</span></button>
+                                }
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="listfilm" style="display: flex; overflow-x: scroll;">
+                        @foreach (var item in @ViewBag.ListFilm)
+                        {
+                            <a href="@Url.Action("Ep", "Admin", new { id = item.MovieId })">
+                                <div class="card" style="width:200px; height: 300px;">
+                                    <img class="card-img-top" src="@item.Poster" alt="Card image" style="width:100%">
+                                    <div class="card-body" style="padding: 0;">
+                                        <span class="d-flex justify-content-center card-title">@item.Title</span>
+                                    </div>
+                                </div>
+                            </a>
+                        }
+                        </div>
+                        <hr>
+                        <button class="btn btn-success"><i class="fa-solid fa-plus"></i></button>
+                        <div class="content">
+                            <p style="color:red;">@ViewBag.ErrorMessage</p>
+                            <table border="1">
+                                <colgroup>
+                                    <col style="width:5%;">
+                                    <col style="width:15%;">
+                                    <col style="width:30%;">
+                                    <col style="width:20%;">
+                                    <col style="width:20%;">
+                                    <col style="width:5%;">
+                                    <col style="width:5%;">
+                                </colgroup>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Ep Name</th>
+                                    <th>Ep Film</th>
+                                    <th>Duration</th>
+                                    <th>View</th>
+                                    <th>ID film</th>
+                                    <th></th>
+                                </tr>
+                            @using (Html.BeginForm("EpEdit", "Admin", FormMethod.Post))
+                            {
+                                <tr>
+                                    <td><input readonly type="text" name="EpisodeId" value="@ViewBag.Ep.EpisodeId"></td>
+                                    <td><input type="text" name="EpisodeName" value="@ViewBag.Ep.EpisodeName"></td>
+                                    <td><input type="text" name="EpisodeFilm" value="@ViewBag.Ep.EpisodeFilm"></td>
+                                    <td><input type="text" name="Duration" value="@ViewBag.Ep.Duration"></td>
+                                    <td><input type="text" name="View" value="@ViewBag.Ep.View"></td>
+                                    <td><input readonly type="text" name="MovieId" value="@ViewBag.Ep.MovieId"></td>
+                                    <td><button class="btn btn-success" type="submit"><i class="fa-solid fa-pen-nib"></i></button></td>
+                                </tr>
+                                }
+                            </table>
+                        </div>
+                        <hr>
+                        <div class="content">
+                            <table border="1">
+                                <colgroup>
+                                    <col style="width:20%;">
+                                    <col style="width:30%;">
+                                    <col style="width:20%;">
+                                    <col style="width:20%;">
+                                    <col style="width:10%;">
+                                </colgroup>
+                                <tr>
+                                    <th>Ep Name</th>
+                                    <th>Ep Film</th>
+                                    <th>Duration</th>
+                                    <th>View</th>
+                                    <th></th>
+                                </tr>
+                            @if (@ViewBag.Listep!= null){
+                                @foreach (var itemfilm in @ViewBag.Listep){
+                                <tr>
+                                    <td>@itemfilm.EpisodeName</td>
+                                    <td>@itemfilm.EpisodeFilm</td>
+                                    <td>@itemfilm.Duration</td>
+                                    <td>@itemfilm.View</td>
+                                    <td>
+                                       @using (Html.BeginForm("DeleteEp", "Admin", new { idep = @itemfilm.EpisodeId, idfilm = @itemfilm.MovieId }, FormMethod.Post))
+                                        {
+                                            <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash-can"></i></button>
+                                        }
+                                        @using (Html.BeginForm("EpEdit", "Admin", new { idep = @itemfilm.EpisodeId, idfilm = @itemfilm.MovieId }, FormMethod.Post))
+                                        {
+                                            <button class="btn btn-primary"><i class="fa-solid fa-pen-nib"></i></button>
+                                        }
+                                    </td>
+                                </tr>
+                                }
+                             }
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </body>
+    </html>
+</span>
