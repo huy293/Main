@@ -1,47 +1,49 @@
 <?php
-include_once '../model/connect.php';
+require_once '/var/www/html/config/database.php';
+
 class ScheduleModel {
     private $conn;
 
-    public function __construct($conn) {
-        $this->conn = $conn;
+    public function __construct() {
+        $this->conn = database();
     }
 
-    // 🔹 Thêm lịch làm việc
-    public function addSchedule($staff_id, $work_date, $shift, $status = 'assigned') {
-        $sql = "INSERT INTO schedule (staff_id, work_date, shift, status) VALUES (?, ?, ?, ?)";
-        return $this->execute($sql, [$staff_id, $work_date, $shift, $status]);
-    }
-
-    // 🔹 Lấy danh sách lịch làm việc
     public function getAllSchedules() {
-        return $this->fetchAll("SELECT * FROM schedule");
-    }
-
-    // 🔹 Lấy lịch theo nhân viên
-    public function getScheduleByStaff($staff_id) {
-        return $this->fetchAll("SELECT * FROM schedule WHERE staff_id = ?", [$staff_id]);
-    }
-
-    // 🔹 Cập nhật trạng thái lịch
-    public function updateScheduleStatus($id, $status) {
-        return $this->execute("UPDATE schedule SET status = ? WHERE id = ?", [$status, $id]);
-    }
-
-    // 🔹 Xóa lịch làm việc (sẽ tự động xóa nếu nhân viên bị xóa do `ON DELETE CASCADE`)
-    public function deleteSchedule($id) {
-        return $this->execute("DELETE FROM schedule WHERE id = ?", [$id]);
-    }
-
-    private function execute($sql, $params = []) {
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute($params);
-        return $stmt;
-    }
-
-    private function fetchAll($sql, $params = []) {
-        $stmt = $this->execute($sql, $params);
+        $query = "SELECT * FROM schedule WHERE status != 'completed'";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getScheduleById($id) {
+        $query = "SELECT * FROM schedule WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function createSchedule($data) {
+        $query = "INSERT INTO schedule (staff_id, work_date, shift, status) 
+                  VALUES (:staff_id, :work_date, :shift, 'assigned')";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($data);
+        return $this->conn->lastInsertId();
+    }
+
+    public function updateSchedule($id, $data) {
+        $query = "UPDATE schedule SET work_date = :work_date, shift = :shift, status = :status WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute($data);
+        return $stmt->rowCount();
+    }
+
+    public function completeSchedule($id) {
+        $query = "UPDATE schedule SET status = 'completed' WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->rowCount();
+    }
 }
-?>

@@ -1,86 +1,73 @@
 <?php
-if (session_status() == PHP_SESSION_NONE) {
+if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-ob_start();
-include_once "../model/ServiceModel.php"; 
+
+require_once '/var/www/html/model/ServiceModel.php';
 
 class ServiceController {
     private $serviceModel;
 
     public function __construct() {
-        // Kiểm tra nếu chưa đăng nhập hoặc không phải admin, thì redirect
-        // if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'admin') {
-        //     echo '<meta http-equiv="refresh" content="0;url=login.php">';
-        //     exit();
-        // }
-
         $this->serviceModel = new ServiceModel();
     }
 
-    // Hiển thị danh sách dịch vụ
-    public function listServices() {
-        return $this->serviceModel->getAllServices();
+    // Lấy danh sách dịch vụ
+    public function getAllServices() {
+        $services = $this->serviceModel->getAllServices();
+        echo json_encode(['status' => true, 'data' => $services]);
+        exit;
     }
-    
-    // Xử lý thêm dịch vụ
-    public function addService() {    
-        $name = $_POST['name'] ?? '';
-        $price = $_POST['price'] ?? 0;
-        $duration = $_POST['duration'] ?? 0;
-        $description = $_POST['description'] ?? '';
-        $image = $_POST['image'] ?? null;
-        if ($this->serviceModel->isServiceExists($name)) {
-            echo "<script>
-                    alert('Tên dịch vụ đã tồn tại! Vui lòng chọn tên khác.');
-                     // Quay lại trang trước đó
-                  </script>";
-            exit();
-        }
-        if ($this->serviceModel->addService($name, $price, $duration, $description, $image)) {
-            echo "<script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        loadPage('service.php?action=listServices');
-                    });
-                </script>";
 
+    // Lấy dịch vụ theo ID
+    public function getServiceById($id) {
+        $service = $this->serviceModel->getServiceById($id);
+        if ($service) {
+            echo json_encode(['status' => true, 'data' => $service]);
         } else {
-            echo json_encode(["success" => false, "message" => "Lỗi khi thêm dịch vụ"]);
+            echo json_encode(['status' => false, 'message' => 'Không tìm thấy dịch vụ']);
         }
+        exit;
     }
 
-    // Xử lý cập nhật dịch vụ
-    public function updateService() {    
-        $id = $_POST['id'] ?? 0;
-        $name = $_POST['name'] ?? '';
-        $price = $_POST['price'] ?? 0;
-        $duration = $_POST['duration'] ?? 0;
-        $description = $_POST['description'] ?? '';
-        $image = $_POST['image'] ?? null;
-
-        if ($this->serviceModel->updateService($id, $name, $price, $duration, $description, $image)) {
-            echo "<script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        loadPage('service.php?action=listServices');
-                    });
-                </script>";
-        } else {
-            echo json_encode(["success" => false, "message" => "Lỗi khi cập nhật dịch vụ"]);
+    // Thêm dịch vụ mới
+    public function createService() {
+        if (!isset($_SESSION['is_logged_in']) || $_SESSION['role'] !== 'Admin') {
+            echo json_encode(['status' => false, 'message' => 'Bạn không có quyền thêm dịch vụ']);
+            exit;
         }
+
+        $data = json_decode(file_get_contents("php://input"), true);
+        $success = $this->serviceModel->createService($data);
+        
+        echo json_encode(['status' => $success, 'message' => $success ? 'Thêm dịch vụ thành công' : 'Lỗi khi thêm dịch vụ']);
+        exit;
     }
 
-    // Xử lý xóa dịch vụ
-    public function deleteService() {    
-        if (isset($_POST['id'])) {
-            $id = $_POST['id'];
-            if ($this->serviceModel->deleteService($id)) {
-                echo json_encode(["success" => true]);
-                exit();
-            } else {
-                echo json_encode(["success" => false, "message" => "Lỗi khi xóa dịch vụ"]);
-                exit();
-            }
+    // Cập nhật dịch vụ
+    public function updateService($id) {
+        if (!isset($_SESSION['is_logged_in']) || $_SESSION['role'] !== 'Admin') {
+            echo json_encode(['status' => false, 'message' => 'Bạn không có quyền chỉnh sửa dịch vụ']);
+            exit;
         }
+
+        $data = json_decode(file_get_contents("php://input"), true);
+        $success = $this->serviceModel->updateService($id, $data);
+        
+        echo json_encode(['status' => $success, 'message' => $success ? 'Cập nhật dịch vụ thành công' : 'Lỗi khi cập nhật dịch vụ']);
+        exit;
+    }
+
+    // Vô hiệu hóa dịch vụ
+    public function disableService($id) {
+        if (!isset($_SESSION['is_logged_in']) || $_SESSION['role'] !== 'Admin') {
+            echo json_encode(['status' => false, 'message' => 'Bạn không có quyền vô hiệu hóa dịch vụ']);
+            exit;
+        }
+
+        $success = $this->serviceModel->disableService($id);
+        echo json_encode(['status' => $success, 'message' => $success ? 'Dịch vụ đã bị vô hiệu hóa' : 'Lỗi khi vô hiệu hóa dịch vụ']);
+        exit;
     }
 }
 ?>

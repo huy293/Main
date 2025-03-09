@@ -1,7 +1,10 @@
 <?php
-include_once "../model/StaffModel.php";
-include_once "../model/ScheduleModel.php";
-include_once "../model/AttendanceModel.php";
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once '/var/www/html/model/StaffModel.php';
+
 class StaffController {
     private $staffModel;
 
@@ -9,52 +12,62 @@ class StaffController {
         $this->staffModel = new StaffModel();
     }
 
-    public function listStaff() {
-        return $this->staffModel->getAllStaff();
+    // Lấy danh sách nhân viên
+    public function getAllStaff() {
+        $staff = $this->staffModel->getAllStaff();
+        echo json_encode(['status' => true, 'data' => $staff]);
+        exit;
     }
 
-    public function addStaff() {
-        $account_id = $_POST['account_id'] ?? 0;
-        $phone = $_POST['phone'] ?? '';
-        $gender = $_POST['gender'] ?? 'Male';
-        $salary = $_POST['salary'] ?? 0;
-        $dob = $_POST['dob'] ?? null;
-        $shift = $_POST['shift'] ?? 'Sáng';
-
-        if ($this->staffModel->addStaff($account_id, $phone, $gender, $salary, $dob, $shift)) {
-            echo json_encode(["success" => true]);
+    // Lấy thông tin nhân viên theo ID
+    public function getStaffById($id) {
+        $staff = $this->staffModel->getStaffById($id);
+        if ($staff) {
+            echo json_encode(['status' => true, 'data' => $staff]);
         } else {
-            echo json_encode(["success" => false, "message" => "Lỗi khi thêm nhân viên"]);
+            echo json_encode(['status' => false, 'message' => 'Không tìm thấy nhân viên']);
         }
+        exit;
     }
 
-    public function updateStaff() {
-        $id = $_POST['id'] ?? 0;
-        $phone = $_POST['phone'] ?? '';
-        $gender = $_POST['gender'] ?? 'Male';
-        $salary = $_POST['salary'] ?? 0;
-        $dob = $_POST['dob'] ?? null;
-        $shift = $_POST['shift'] ?? '9:00-13:00';
-
-        if ($this->staffModel->updateStaff($id, $phone, $gender, $salary, $dob, $shift)) {
-            echo "<script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        loadPage('employee.php?action=listStaff');
-                    });
-                </script>";
-        } else {
-            echo json_encode(["success" => false, "message" => "Lỗi khi cập nhật nhân viên"]);
+    // Thêm nhân viên mới
+    public function createStaff() {
+        if (!isset($_SESSION['is_logged_in']) || $_SESSION['role'] !== 'Admin') {
+            echo json_encode(['status' => false, 'message' => 'Bạn không có quyền thêm nhân viên']);
+            exit;
         }
+
+        $data = json_decode(file_get_contents("php://input"), true);
+        $success = $this->staffModel->createStaff($data);
+        
+        echo json_encode(['status' => $success, 'message' => $success ? 'Thêm nhân viên thành công' : 'Lỗi khi thêm nhân viên']);
+        exit;
     }
 
-    public function deleteStaff() {
-        $id = $_POST['id'] ?? 0;
-
-        if ($this->staffModel->deleteStaff($id)) {
-            echo json_encode(["success" => true]);
-        } else {
-            echo json_encode(["success" => false, "message" => "Lỗi khi xóa nhân viên"]);
+    // Cập nhật thông tin nhân viên
+    public function updateStaff($id) {
+        if (!isset($_SESSION['is_logged_in']) || $_SESSION['role'] !== 'Admin') {
+            echo json_encode(['status' => false, 'message' => 'Bạn không có quyền chỉnh sửa thông tin nhân viên']);
+            exit;
         }
+
+        $data = json_decode(file_get_contents("php://input"), true);
+        $success = $this->staffModel->updateStaff($id, $data);
+        
+        echo json_encode(['status' => $success, 'message' => $success ? 'Cập nhật nhân viên thành công' : 'Lỗi khi cập nhật nhân viên']);
+        exit;
+    }
+
+    // Vô hiệu hóa nhân viên
+    public function disableStaff($id) {
+        if (!isset($_SESSION['is_logged_in']) || $_SESSION['role'] !== 'Admin') {
+            echo json_encode(['status' => false, 'message' => 'Bạn không có quyền vô hiệu hóa nhân viên']);
+            exit;
+        }
+
+        $success = $this->staffModel->disableStaff($id);
+        echo json_encode(['status' => $success, 'message' => $success ? 'Nhân viên đã bị vô hiệu hóa' : 'Lỗi khi vô hiệu hóa nhân viên']);
+        exit;
     }
 }
 ?>

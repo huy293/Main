@@ -1,47 +1,48 @@
 <?php
-include_once '../model/connect.php';
+require_once '/var/www/html/config/database.php';
 
 class ServiceModel {
     private $conn;
 
     public function __construct() {
-        $this->conn = connect();
+        $this->conn = database();
     }
 
     public function getAllServices() {
-        $sql = "SELECT * FROM service";
-        $result = $this->conn->query($sql);
-        return $result->fetch_all(MYSQLI_ASSOC);
-    }
-    public function isServiceExists($name) {
-        $query = "SELECT COUNT(*) FROM service WHERE name = ?";
+        $query = "SELECT * FROM service WHERE status != 'inactive'";
         $stmt = $this->conn->prepare($query);
-        $stmt->bind_param("s", $name);
         $stmt->execute();
-        $stmt->bind_result($count);
-        $stmt->fetch();
-        $stmt->close();
-        
-        return $count > 0; // Trả về true nếu đã tồn tại
-    }
-    
-    public function addService($name, $price, $duration, $description, $image) {
-        $stmt = $this->conn->prepare("INSERT INTO service (name, price, duration, description, service_image) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("sdiss", $name, $price, $duration, $description, $image);
-        return $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function updateService($id, $name, $price, $duration, $description, $image) {
-        $stmt = $this->conn->prepare("UPDATE service SET name=?, price=?, duration=?, description=?, service_image=? WHERE id=?");
-        $stmt->bind_param("sdissi", $name, $price, $duration, $description, $image, $id);
-        return $stmt->execute();
+    public function getServiceById($id) {
+        $query = "SELECT * FROM service WHERE id = :id AND status != 'inactive'";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function deleteService($id) {
-        $stmt = $this->conn->prepare("DELETE FROM service WHERE id = ?");
-        $stmt->bind_param("i", $id);
-        return $stmt->execute();
+    public function createService($data) {
+        $query = "INSERT INTO service (name, price, duration, status) VALUES (:name, :price, :duration, 'active')";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($data);
+        return $this->conn->lastInsertId();
+    }
+
+    public function updateService($id, $data) {
+        $query = "UPDATE service SET name = :name, price = :price, duration = :duration WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute($data);
+        return $stmt->rowCount();
+    }
+
+    public function disableService($id) {
+        $query = "UPDATE service SET status = 'inactive' WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->rowCount();
     }
 }
-?>
-

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Register</title>
+    <style>
+        body {
+            background-image: linear-gradient(to right,rgba(27,31,52,0.8),rgba(27,31,52,0.8)), url('image/bia.jpg');
+            background-size: cover;
+        }
+        .message {
+            text-align: center;
+            color: white;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+
+<body>
+    <form id="registerForm">
+        <div class="container">
+            <div class="box">
+                <div class="box-register" id="register">
+                    <i class="fas fa-times fa-right fa-lg" id="next" onclick="exit()"></i>
+                    <div class="top-header">
+                        <h3>Register</h3>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-field">
+                            <input type="text" class="input-box" id="username" name="username" required>
+                            <label for="username">Username</label>
+                        </div>
+                        <div class="input-field">
+                            <input type="password" class="input-box" id="password" name="password" required>
+                            <label for="password">Password</label>
+                        </div>
+                        <div class="input-field">
+                            <input type="text" class="input-box" id="name" name="name" required>
+                            <label for="name">Name</label>
+                        </div>
+                        <div class="input-field">
+                            <input type="text" class="input-box" id="phone" name="phone" required>
+                            <label for="phone">Phone number</label>
+                        </div>
+                        <div class="input-field">
+                            <input type="email" class="input-box" id="email" name="email" required>
+                            <label for="email">Email</label>
+                        </div>
+                        <div class="input-field">
+                            <input type="submit" class="input-submit" value="Sign Up">
+                        </div>
+                        <div class="forgot">
+                            <a href="login.html">Back to Login !</a>
+                        </div>
+                        <div class="message" id="message"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>    
+
+    <script>
+        document.getElementById("registerForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Ngăn chặn load lại trang
+
+            let formData = new FormData(this);
+            let messageDiv = document.getElementById("message");
+
+            fetch("http://localhost:8080/routes.php?route=auth/register", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status) {
+                    messageDiv.innerHTML = `<span class="success">${data.message}</span>`;
+                    setTimeout(() => {
+                        window.location.href = "otp_verification.html"; // Chuyển hướng đến trang nhập OTP
+                    }, 2000);
+                } else {
+                    messageDiv.innerHTML = `<span class="error">${data.message}</span>`;
+                }
+            })
+            .catch(error => {
+                messageDiv.innerHTML = `<span class="error">Lỗi kết nối đến server</span>`;
+            });
+        });
+
+        function exit() {
+            window.location.href = "home.html";
+        }
+    </script>
+</body>
+</html>
