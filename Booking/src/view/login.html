@@ -16,7 +16,7 @@
 </head>
 
 <body>
-    <form action="" method="post">
+    <form id="loginForm">
         <div class="container">
             <div class="box">
                 <!------------------ Login Box --------------------->
@@ -28,12 +28,12 @@
                     </div>
                     <div class="input-group">
                         <div class="input-field">
-                            <input type="text" class="input-box" id="logEmail" name="logEmail" required>
-                            <label for="logEmail">Username</label>
+                            <input type="text" class="input-box" id="username" name="username" required>
+                            <label for="username">Username</label>
                         </div>
                         <div class="input-field">
-                            <input type="password" class="input-box" id="logPassword" name="logPassword" required>
-                            <label for="logPassword">Password</label>
+                            <input type="password" class="input-box" id="password" name="password" required>
+                            <label for="password">Password</label>
                             <div class="eye-area">
                                 <div class="eye-box" onclick="myLogPassword()">
                                     <i class="fa-regular fa-eye" id="eye"></i>
@@ -64,7 +64,7 @@
         // view password codes
 
         function myLogPassword() {
-            var a = document.getElementById('logPassword');
+            var a = document.getElementById('password');
             var b = document.getElementById('eye');
             var c = document.getElementById('eye-slash');
             if (a.type === "password") {
@@ -77,6 +77,33 @@
                 c.style.opacity = "0";
             }
         }
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Ngừng gửi form mặc định
+
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('logPassword').value;
+
+            // Gửi yêu cầu POST tới server để đăng nhập
+            fetch('login.php', {  // Điều chỉnh URL này theo endpoint của bạn
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password)
+            })
+            .then(response => response.json())  // Giả sử server trả về JSON
+            .then(data => {
+                if (data.success) {
+                    window.location.href = 'home.html';
+                } else {
+                    alert('Incorrect username or password');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again later.');
+            });
+        });
         function exit(){
             window.location.href = "home.html";
         }

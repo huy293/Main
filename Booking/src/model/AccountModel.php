@@ -29,7 +29,7 @@ class AccountModel {
     public function getAccountByUsername($username) {
         $query = "SELECT * FROM " . $this->table . " WHERE username = ?";
         $stmt = $this->conn->prepare($query);
-        $stmt->bind_param("s", $username);
+        $stmt->bind_param("s", $username);  
         $stmt->execute();
         return $stmt->get_result()->fetch_assoc();
     }
@@ -55,7 +55,7 @@ class AccountModel {
         $query = "INSERT INTO " . $this->table . " (username, pad, name, phone, email, role, status) 
                   VALUES (?, ?, ?, ?, ?, ?, 'Active')";
         $stmt = $this->conn->prepare($query);
-        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         $stmt->bind_param("ssssss", $username, $hashedPassword, $name, $phone, $email, $role);
         return $stmt->execute();
     }
@@ -70,7 +70,7 @@ class AccountModel {
 
     // Vô hiệu hóa tài khoản (Đánh dấu chứ không xóa ngay)
     public function deactivateAccount($id) {
-        $query = "UPDATE " . $this->table . " SET status = 'Deactivated', deactivated_at = NOW() WHERE id = ?";
+        $query = "UPDATE " . $this->table . " SET status = 'Inactive' WHERE id = ?";
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param("i", $id);
         return $stmt->execute();
@@ -78,7 +78,7 @@ class AccountModel {
 
     // Kích hoạt lại tài khoản
     public function reactivateAccount($id) {
-        $query = "UPDATE " . $this->table . " SET status = 'Active', deactivated_at = NULL WHERE id = ?";
+        $query = "UPDATE " . $this->table . " SET status = 'Active' WHERE id = ?";
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param("i", $id);
         return $stmt->execute();
@@ -90,18 +90,17 @@ class AccountModel {
     
         if (!$user) {
             return false; // Không tìm thấy tài khoản
-        }
-    
-        if ($user['status'] !== 'Active') {
-            return false; // Tài khoản bị vô hiệu hóa
-        }
-    
+        }    
+        // So sánh mật khẩu nhập vào với mật khẩu đã mã hóa trong cơ sở dữ liệu
         if (!password_verify($password, $user['pad'])) {
             return false; // Sai mật khẩu
         }
     
         return $user; // Đăng nhập thành công
     }
+    
+
+    
     
 
     // Tìm kiếm tài khoản theo role, keyword hoặc status

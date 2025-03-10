@@ -1,4 +1,19 @@
 <?php
+header("Access-Control-Allow-Origin: http://127.0.0.1:5500"); // Chỉ cho phép từ Frontend
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, X-Requested-With");
+header("Access-Control-Allow-Credentials: true");
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
+
 // Load tất cả các controller
 require_once '/var/www/html/controller/AccountController.php';
 require_once '/var/www/html/controller/AuthController.php';

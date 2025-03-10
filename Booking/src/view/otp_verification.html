@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Verify OTP</title>
+    <style>
+        body {
+            background-image: linear-gradient(to right,rgba(27,31,52,0.8),rgba(27,31,52,0.8)), url('image/bia.jpg');
+            background-size: cover;
+        }
+        .message {
+            text-align: center;
+            color: white;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+
+<body>
+    <form id="otpForm">
+        <div class="container">
+            <div class="box-otp">
+                <div class="box-login" id="otp">
+                    <i class="fas fa-times fa-right fa-lg" id="next" onclick="exit()"></i>
+                    <div class="top-header">
+                        <h3>Verify OTP</h3>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-field">
+                            <input type="text" class="input-box" id="otpCode" name="otp" required>
+                            <label for="otpCode">OTP</label>
+                        </div>
+                        <div class="input-field">
+                            <input type="submit" class="input-submit" value="Verify OTP">
+                        </div>
+                        <div class="forgot">
+                            <a href="register.html">Back to Register</a>
+                        </div>
+                        <div class="message" id="message"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>    
+
+    <script>
+        document.getElementById("otpForm").addEventListener("submit", async function(event) {
+            event.preventDefault(); // Ngăn load lại trang
+
+            let otpCode = document.getElementById("otpCode").value;
+            let messageDiv = document.getElementById("message");
+
+            try {
+                let response = await fetch("http://localhost:8080/routes.php?route=auth/verifyOTP", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: new URLSearchParams({
+                        otp: otpCode,
+                        email: localStorage.getItem("register_email") // Lấy email đã lưu khi đăng ký
+                    }),
+                    credentials: "include"
+                });
+
+                let data = await response.json();
+
+                if (data.status) {
+                    messageDiv.innerHTML = `<span class="success">${data.message}</span>`;
+
+                    // Xóa email lưu tạm trong localStorage
+                    localStorage.removeItem("register_email");
+
+                    setTimeout(() => {
+                        window.location.href = "login.html"; // Chuyển đến trang đăng nhập
+                    }, 2000);
+                } else {
+                    messageDiv.innerHTML = `<span class="error">${data.message}</span>`;
+                }
+            } catch (error) {
+                console.error("Lỗi kết nối:", error);
+                messageDiv.innerHTML = `<span class="error">Lỗi kết nối đến server</span>`;
+            }
+        });
+
+        // Hàm thoát
+        function exit() {
+            window.location.href = "home.html";
+        }
+    </script>
+</body>
+</html>

@@ -39,7 +39,7 @@ class AuthController {
         // Lưu thông tin đăng ký vào session
         $_SESSION['register_data'] = [
             'username' => $username,
-            'password' => password_hash($password, PASSWORD_BCRYPT), // Mã hóa mật khẩu
+            'password' => $password, // Mã hóa mật khẩu
             'name' => $name,
             'phone' => $phone,
             'email' => $email
@@ -55,26 +55,23 @@ class AuthController {
         exit;
     }
     
-    public function verifyOTP() {
-        session_start();
+    public function verifyOTP() {    
+        if (!isset($_SESSION['register_data'])) {
+            echo json_encode(['status' => false, 'message' => 'Lỗi xác thực, vui lòng đăng ký lại']);
+            exit;
+        }
     
-        $email = isset($_POST['email']) ? trim($_POST['email']) : null;
+        $email = $_SESSION['register_data']['email']; // Lấy email từ session
         $otp = isset($_POST['otp']) ? trim($_POST['otp']) : null;
     
-        if (!$email || !$otp) {
-            echo json_encode(['status' => false, 'message' => 'Vui lòng nhập email và OTP']);
+        if (!$otp) {
+            echo json_encode(['status' => false, 'message' => 'Vui lòng nhập mã OTP']);
             exit;
         }
     
-        // Kiểm tra OTP có đúng không
+        // Kiểm tra OTP
         if (!verifyOTP($email, $otp)) {
             echo json_encode(['status' => false, 'message' => 'Mã OTP không hợp lệ hoặc đã hết hạn']);
-            exit;
-        }
-    
-        // Kiểm tra session có lưu thông tin đăng ký không
-        if (!isset($_SESSION['register_data']) || $_SESSION['register_data']['email'] !== $email) {
-            echo json_encode(['status' => false, 'message' => 'Lỗi xác thực, vui lòng đăng ký lại']);
             exit;
         }
     
@@ -102,11 +99,11 @@ class AuthController {
     
     
     
+    
     // Đăng nhập
     public function login() {
         $username = isset($_POST['username']) ? $_POST['username'] : null;
         $password = isset($_POST['password']) ? $_POST['password'] : null;
-        var_dump($username, $password);
 
         if (!$username || !$password) {
             echo json_encode(['status' => false, 'message' => 'Vui lòng nhập tài khoản và mật khẩu']);
@@ -161,31 +158,33 @@ class AuthController {
     }
 
     // Vô hiệu hóa tài khoản
-    public function deactivateAccount($id) {
+    public function deactivateAccount() {
+        // Kiểm tra người dùng đã đăng nhập hay chưa
         if (!isset($_SESSION['is_logged_in']) || !$_SESSION['is_logged_in']) {
             echo json_encode(['status' => false, 'message' => 'Bạn chưa đăng nhập']);
             exit;
         }
-
-        if ($_SESSION['role'] === 'Admin' || $_SESSION['user_id'] == $id) {
-            $success = $this->accountModel->deactivateAccount($id);
-            echo json_encode(['status' => $success, 'message' => $success ? 'Tài khoản đã bị vô hiệu hóa' : 'Không thể vô hiệu hóa tài khoản']);
-        } else {
-            echo json_encode(['status' => false, 'message' => 'Bạn không có quyền vô hiệu hóa tài khoản này']);
-        }
+    
+        // Lấy ID từ session
+        $id = $_SESSION['user_id'];
+    
+        // Vô hiệu hóa tài khoản của chính người dùng
+        $success = $this->accountModel->deactivateAccount($id);
+        echo json_encode(['status' => $success, 'message' => $success ? 'Tài khoản đã bị vô hiệu hóa' : 'Không thể vô hiệu hóa tài khoản']);
         exit;
     }
+    
 
     // Kích hoạt lại tài khoản
-    public function reactivateAccount($id) {
-        if (!isset($_SESSION['is_logged_in']) || $_SESSION['role'] !== 'Admin') {
-            echo json_encode(['status' => false, 'message' => 'Bạn không có quyền kích hoạt lại tài khoản']);
+    public function reactivateAccount() {
+        if (!isset($_SESSION['is_logged_in']) || !$_SESSION['is_logged_in']) {
+            echo json_encode(['status' => false, 'message' => 'Bạn chưa đăng nhập']);
             exit;
         }
-
-        $success = $this->accountModel->reactivateAccount($id);
+        $success = $this->accountModel->reactivateAccount($_SESSION['user_id']);
         echo json_encode(['status' => $success, 'message' => $success ? 'Tài khoản đã được kích hoạt lại' : 'Không thể kích hoạt lại tài khoản']);
         exit;
     }
+    
 }
 ?>
