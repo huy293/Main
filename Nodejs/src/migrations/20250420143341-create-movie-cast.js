@@ -1,0 +1,32 @@
+'use strict';
+
+/** @type {import('sequelize-cli').Migration} */
+module.exports = {
+  async up (queryInterface, Sequelize) {
+    await queryInterface.createTable('MovieCasts', {
+      movieId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Movies',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
+      },
+      personId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'People',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
+      },
+      role: {
+        type: Sequelize.STRING,
+      },
+    });
+  },
+
+  async down (queryInterface, Sequelize) {
+    await queryInterface.dropTable('MovieCasts');
+  }
+};
