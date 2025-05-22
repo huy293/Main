@@ -69,7 +69,18 @@
             align-items: center;
             
         }
-
+        .title{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            height: 150px;
+        }
+        .title #openNav{
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
         #mySidebar .log_out {
             position: absolute;
             bottom: 10px;
@@ -80,9 +91,8 @@
 
 <body>
     <div id="main">
-
-        <div class="w3-teal">
-            <button id="openNav" class="w3-button w3-teal w3-xlarge" onclick="w3_open()">&#9776;</button>
+        <div class="title" style="background: linear-gradient(to right,rgba(27,31,52,0.8),rgba(27,31,52,0.8))">
+            <button id="openNav" class="w3-button w3-xlarge" style="background: #FFD700; border: 1px solid #FFD700" onclick="w3_open()">&#9776;</button>
             <div class="w3-container" onclick="w3_close()">
                 <h1>My Page</h1>
             </div>

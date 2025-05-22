@@ -1,5 +1,3 @@
-<?php include_once "../routes/routes.php"; 
-?>
 <!DOCTYPE html>
 <html>
 <title>W3.CSS</title>
@@ -13,6 +11,18 @@
     <link rel="stylesheet" href="remixicons/fonts/remixicon.css">
 
 <style>
+    .title{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        height: 150px;
+    }
+    .title #openNav{
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
     #mySidebar .log_out {
         position: absolute;
         bottom: 10px;
@@ -27,31 +37,31 @@
 
     <div class="w3-sidebar w3-bar-block w3-card w3-animate-left" style="display:none" id="mySidebar">
         <div style="display:flex; justify-content: center;">
-            <img src="image\admin.jpg" class="rounded-circle" alt="Cinque Terre" style="wight:400px;height:100px;">
+            <img src="image\admin.jpg" class="rounded-circle" alt="Cinque Terre" style="width:200px;height:200px;">
         </div>
         <p style="display:flex; justify-content: center;">Hello Admin</p>
         <hr style="height:1px;border-width:0;color:gray;background-color:gray;margin:0;">
-            <a href="home.php" class="w3-bar-item w3-button"><i class="fas fa-home fa-lg"></i>
+            <a href="home.html" class="w3-bar-item w3-button"><i class="fas fa-home fa-lg"></i>
             <h6>Home Page</h6>
         </a>
         <hr style="height:1px;border-width:0;color:gray;background-color:gray;margin:0;">
-        <a href="#" class="w3-bar-item w3-button" onclick="loadPage('statistics.php')"><i class="fas fa-coins fa-lg" ></i>
+        <a href="#" class="w3-bar-item w3-button" onclick="loadPage('statistics.html')"><i class="fas fa-coins fa-lg" ></i>
             <h6>Báo cáo thống kê</h6>
         </a>
          <hr style="height:1px;border-width:0;color:gray;background-color:gray;margin:0;">
-        <a href="#" class="w3-bar-item w3-button" onclick="loadPage('employee.php?action=listStaff')"><i class="fas fa-users fa-lg" style="" ></i>
+        <a href="#" class="w3-bar-item w3-button" onclick="loadPage('employee.html')"><i class="fas fa-users fa-lg"" ></i>
             <h6>Quản lý nhân viên</h6>
         </a>
         <hr style="height:1px;border-width:0;color:gray;background-color:gray;margin:0;">
-        <a href="#" class="w3-bar-item w3-button" onclick="loadPage('booking_admin.php?action=listBookings')"><i class="far fa-calendar-check fa-lg" ></i>
+        <a href="#" class="w3-bar-item w3-button" onclick="loadPage('booking_admin.html')"><i class="far fa-calendar-check fa-lg" ></i>
             <h6>Quản lý Booking</h6>
         </a>
         <hr style="height:1px;border-width:0;color:gray;background-color:gray;margin:0;">
-        <a href="#" class="w3-bar-item w3-button" onclick="loadPage('service.php?action=listServices')"><i class="far fa-calendar-check fa-lg" ></i>
+        <a href="#" class="w3-bar-item w3-button" onclick="loadPage('service.html')"><i class="far fa-calendar-check fa-lg" ></i>
             <h6>Quản lý dịch vụ</h6>
         </a>
         <hr style="height:1px;border-width:0;color:gray;background-color:gray;margin:0;">
-        <a href="#" class="w3-bar-item w3-button" onclick="loadPage('account.php')">
+        <a href="#" class="w3-bar-item w3-button" onclick="loadPage('account.html')">
             <i class="fas fa-user-circle fa-lg"></i>
             <h6>Quản lý tài khoản</h6>
         </a>
@@ -63,10 +73,10 @@
 
     <div id="main">
 
-        <div class="w3-teal">
-            <button id="openNav" class="w3-button w3-teal w3-xlarge" onclick="w3_open()">&#9776;</button>
+        <div class="title" style="background: linear-gradient(to right,rgba(27,31,52,0.8),rgba(27,31,52,0.8))">
+            <button id="openNav" class="w3-button w3-xlarge" style="background: #FFD700; border: 1px solid #FFD700" onclick="w3_open()">&#9776;</button>
             <div class="w3-container" onclick="w3_close()">
-                <h1 style="text-align:center;">Chào mừng bạn đến trang quản lý</h1>
+                <h1 style="color:white; text-align:center;">Chào mừng bạn đến trang quản lý</h1>
             </div>
         </div>
     </div>
@@ -90,126 +100,144 @@
             xhttp.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
                     document.getElementById("main").innerHTML = this.responseText;
-                    attachEventHandlers();
+                    history.pushState({}, "", `?page=${pageUrl}`);
+                    handlePageChange(pageUrl);
                 }
             };
             xhttp.open("GET", pageUrl, true);
             xhttp.send();
-            // Đóng thanh sidebar khi chuyển trang
-            w3_close()
         }
         function log_out(){
             if(confirm("Bạn có muốn thoát ?")) {
-                window.location.href = "login.php";
+                window.location.href = "login.html";
             }
         }
-    function attachEventHandlers() {
-        console.log("Đã gọi lại sự kiện!");
+        async function getEmployee() {
+            try{
+                const response = await fetch('http://localhost:8080/routes.php?route=staff/getAllStaff');
+                const data = await response.json();
+                console.log(data);
+                const tablestaff = document.getElementById("staff_list");
+                if (!tablestaff) {
+                    console.error("Không tìm thấy phần tử staff-list! Kiểm tra lại HTML.");
+                    return; // Dừng function nếu không tìm thấy phần tử
+                }
+                data.data.forEach(staff => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                    <td>${staff.id}</td>
+                    <td>${staff.name}</td>
+                    <td>${staff.phone_number}</td>
+                    <td>${staff.gender}</td>
+                    <td>${staff.salary}</td>
+                    <td>${staff.date_of_birth}</td>
+                    <td>${staff.status}</td>
+                    <td>${staff.shift}</td>
+                    <td>
+                        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editStaffModal" 
+                                        onclick="editStaff(${staff.id}, '${staff.phone_number}', '${staff.gender}', ${staff.salary}, '${staff.date_of_birth}', '${staff.shift}')">
+                                        <i class="fas fa-cog fa-lg"></i>
+                                    </button>
+                        <button type="button" class="btn btn-danger btn-delete delete-staff" data-id="${staff.id}">
+                             <i class="fas fa-trash-alt" style="color: white;"></i>
+                        </button>
+                    </td>
+                    `;
+                    tablestaff.appendChild(row);
+                });
+            }
+            catch (error) {
+                console.log("Lỗi khi lấy dữ liệu staff", error);
+            }
+        }
+        function handlePageChange(pageUrl) {
+            if (pageUrl === "employee.html") {
+                getEmployee();
+                setupEditStaffForm();
+            }
+        }
+        function editStaff(id, phone, gender, salary, dob, shift) {
+            // Gán giá trị vào các input trong modal
+            document.getElementById("edit_id").value = id;
+            document.getElementById("edit_phone").value = phone;
+            document.getElementById("edit_gender").value = gender;
+            document.getElementById("edit_salary").value = salary;
+            document.getElementById("edit_dob").value = dob;
+            document.getElementById("edit_shift").value = shift;
 
-        // Cập nhật trạng thái lịch hẹn
-        $(".update-status").off("change").on("change", function() {
-            let id = $(this).data("id");
-            let status = $(this).val();
-            $.post("../view/admin.php?action=updateStatus", { id: id, status: status }, function(response) {
-                console.log("Dữ liệu từ server:", response); // Kiểm tra dữ liệu trả về
+            // Hiển thị modal
+            var editModal = new bootstrap.Modal(document.getElementById("editStaffModal"));
+            editModal.show();
+        }
+        function setupEditStaffForm() {
+            const form = document.getElementById("editStaffForm");
+            if (!form) return; // Kiểm tra nếu form không tồn tại
 
-                let result = JSON.parse(response);
-                if (result.success) {
-                    alert("Cập nhật thành công!");
-                } else {
-                    alert("Lỗi khi cập nhật!");
+            form.addEventListener("submit", async function (event) {
+                event.preventDefault();
+
+                const staffId = document.getElementById("edit_id").value;
+                const phone = document.getElementById("edit_phone").value;
+                const gender = document.getElementById("edit_gender").value;
+                const salary = document.getElementById("edit_salary").value;
+                const dob = document.getElementById("edit_dob").value;
+                const shift = document.getElementById("edit_shift").value;
+
+                if (!staffId) {
+                    alert("Lỗi: ID nhân viên không hợp lệ!");
+                    return;
+                }
+
+                const requestData = {
+                    phone_number: phone,
+                    gender: gender,
+                    salary: salary,
+                    date_of_birth: dob,
+                    shift: shift
+                };
+
+                console.log("Dữ liệu gửi đi:", requestData);
+
+                try {
+                    const response = await fetch(`http://localhost:8080/routes.php?route=staff/updateStaff&id=${staffId}`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        alert("Cập nhật thành công!");
+                        const modalElement = document.getElementById("editStaffModal");
+                        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                        if (modalInstance) {
+                            modalInstance.hide();
+                        }
+
+                        // Reset lại modal nếu cần
+                        setTimeout(() => {
+                            modalElement.classList.remove("show");
+                            modalElement.setAttribute("aria-hidden", "true");
+                            modalElement.style.display = "none";
+
+                            document.body.classList.remove("modal-open");
+                            document.querySelectorAll(".modal-backdrop").forEach(el => el.remove());
+                        }, 300);
+
+                        loadPage('employee.html');
+                    } else {
+                        throw new Error(result.message || "Cập nhật thất bại!");
+                    }
+                } catch (error) {
+                    console.error("Lỗi khi cập nhật:", error);
+                    alert("Có lỗi xảy ra, vui lòng thử lại!");
                 }
             });
-        });
+        }
 
-        // Xóa lịch hẹn
-        $(".delete-booking").off("click").on("click", function() {
-            if (confirm("Bạn có chắc chắn muốn xóa lịch hẹn này?")) {
-                let id = $(this).data("id");
-                $.post("../view/admin.php?action=deleteBooking", { id: id }, function(response) {
-                    let result = JSON.parse(response);
-                    if (result.success) {
-                        alert("Xóa thành công!");
-                        loadPage('booking_admin.php?action=listBookings');
-                    } else {
-                        alert("Lỗi khi xóa!");
-                    }
-                });
-            }
-        });
-        
-
-        $(".delete-service").off("click").on("click", function() {
-            if (confirm("Bạn có chắc chắn muốn xóa dịch vụ này?")) {
-                let id = $(this).data("id");
-                $.post("../view/admin.php?action=deleteService", { id: id }, function(response) {
-                    let result = JSON.parse(response);
-                    if (result.success) {
-                        alert("Xóa thành công!");
-                        loadPage('service.php?action=listServices');
-                    } else {
-                        alert("Lỗi khi xóa!");
-                    }
-                });
-            }
-        });
-        $(".delete-staff").off("click").on("click", function() {
-            if (confirm("Bạn có chắc chắn muốn xóa nhân viên này?")) {
-                let id = $(this).data("id");
-                $.post("../view/admin.php?action=deleteStaff", { id: id }, function(response) {
-                    let result = JSON.parse(response);
-                    if (result.success) {
-                        alert("Xóa thành công!");
-                        loadPage('service.php?action=listServices');
-                    } else {
-                        alert("Lỗi khi xóa!");
-                    }
-                });
-            }
-        });
-    }
-    $(document).ready(function() {
-        attachEventHandlers();
-    });
-    $(document).ready(function () {
-        $(document).on("click", ".edit-service", function () {
-
-            // Lấy dữ liệu từ data-attributes
-            $("#editServiceId").val($(this).data("id"));
-            $("#editServiceName").val($(this).data("name"));
-            $("#editServicePrice").val($(this).data("price"));
-            $("#editServiceDuration").val($(this).data("duration"));
-            $("#editServiceDescription").val($(this).data("description"));
-            $("#editServiceImage").val($(this).data("image"));
-
-            // Hiển thị modal chỉnh sửa
-            $("#editServiceModal").modal("show");
-        });
-    });
-    function addStaff() {
-    let account_id = document.getElementById("account_id").value;
-    let phone = document.getElementById("phone").value;
-    let gender = document.getElementById("gender").value;
-    let salary = document.getElementById("salary").value;
-    let dob = document.getElementById("dob").value;
-    let shift = document.getElementById("shift").value;
-    
-    fetch("../../routes.php?action=addStaff", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `account_id=${account_id}&phone=${phone}&gender=${gender}&salary=${salary}&dob=${dob}&shift=${shift}`
-    }).then(res => res.json()).then(() => location.reload());
-}
-
-function editStaff(id, phone, gender, salary, dob, shift) {
-    document.getElementById("edit_id").value = id;
-    document.getElementById("edit_phone").value = phone;
-    document.getElementById("edit_gender").value = gender;
-    document.getElementById("edit_salary").value = salary;
-    document.getElementById("edit_dob").value = dob;
-    let shiftSelect = document.getElementById("edit_shift");
-    shiftSelect.value = shift;
-}
 
 </script>
 </body>

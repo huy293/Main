@@ -39,7 +39,7 @@ class AuthController {
         // Lưu thông tin đăng ký vào session
         $_SESSION['register_data'] = [
             'username' => $username,
-            'password' => $password, // Mã hóa mật khẩu
+            'password' => $password,
             'name' => $name,
             'phone' => $phone,
             'email' => $email

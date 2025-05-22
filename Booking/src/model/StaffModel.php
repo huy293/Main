@@ -9,10 +9,15 @@ class StaffModel {
     }
 
     public function getAllStaff() {
-        $query = "SELECT * FROM staff WHERE status != 'Inactive'";
+        $query = "SELECT staff.*, account.name 
+          FROM staff 
+          JOIN account ON staff.account_id = account.id 
+          WHERE staff.status != 'Inactive'";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $result = $stmt->get_result();
+
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 
     public function getStaffById($id) {
@@ -31,12 +36,19 @@ class StaffModel {
     }
 
     public function updateStaff($id, $data) {
-        $query = "UPDATE staff SET phone_number = :phone_number, gender = :gender, salary = :salary, 
-                  date_of_birth = :date_of_birth, shift = :shift WHERE id = :id";
+        $query = "UPDATE staff SET phone_number = ?, gender = ?, salary = ?, date_of_birth = ?, shift = ? WHERE id = ?";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        return $stmt->execute($data);
+        $stmt->bind_param("ssissi", 
+            $data['phone_number'], 
+            $data['gender'], 
+            $data['salary'], 
+            $data['date_of_birth'], 
+            $data['shift'], 
+            $id
+        );
+        return $success = $stmt->execute();
     }
+    
 
     public function disableStaff($id) {
         $query = "UPDATE staff SET status = 'Inactive' WHERE id = :id";

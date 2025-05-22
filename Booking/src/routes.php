@@ -56,7 +56,12 @@ if ($route) {
 
             // Kiểm tra method có tồn tại trong controller không
             if (method_exists($controller, $method)) {
-                $controller->$method(); // Gọi method
+                if (isset($_GET['id'])) {
+                    $id = (int)$_GET['id']; // Chuyển id thành số nguyên
+                    $controller->$method($id); // Gọi hàm và truyền id
+                } else {
+                    $controller->$method(); // Gọi hàm không có tham số
+                }
                 exit;
             }
         }

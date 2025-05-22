@@ -78,22 +78,19 @@
             }
         }
         document.getElementById("loginForm").addEventListener("submit", function(event) {
-            event.preventDefault(); // Ngừng gửi form mặc định
-
+            event.preventDefault();
             var username = document.getElementById('username').value;
-            var password = document.getElementById('logPassword').value;
-
-            // Gửi yêu cầu POST tới server để đăng nhập
-            fetch('login.php', {  // Điều chỉnh URL này theo endpoint của bạn
+            var password = document.getElementById('password').value;
+            fetch('http://localhost:8080/routes.php?route=auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
                 body: 'username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password)
             })
-            .then(response => response.json())  // Giả sử server trả về JSON
+            .then(response => response.json())
             .then(data => {
-                if (data.success) {
+                if (data.status) {
                     window.location.href = 'home.html';
                 } else {
                     alert('Incorrect username or password');
