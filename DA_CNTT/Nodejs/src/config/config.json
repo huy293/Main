@@ -1,0 +1,26 @@
+{
+  "development": {
+    "username": "huydev",
+    "password": "29032003",
+    "database": "HH_Movie",
+    "host": "localhost",
+    "dialect": "mysql",
+    "port": 3307 
+  },
+  "test": {
+    "username": "huydev",
+    "password": "29032003",
+    "database": "HH_Movie",
+    "host": "localhost",
+    "dialect": "mysql",
+    "port": 3307 
+  },
+  "production": {
+    "username": "huydev",
+    "password": "29032003",
+    "database": "HH_Movie",
+    "host": "localhost",
+    "dialect": "mysql",
+    "port": 3307 
+  }
+}

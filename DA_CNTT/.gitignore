@@ -1,0 +1,6 @@
+# Ignore node_modules and .env in sub-projects
+movie-fe/node_modules/
+movie-fe/.env
+
+Nodejs/node_modules/
+Nodejs/.env
