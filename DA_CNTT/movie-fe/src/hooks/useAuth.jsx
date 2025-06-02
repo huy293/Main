@@ -1,15 +1,13 @@
 // useAdminAuth.js
 import { useEffect, useState, useCallback } from "react";
-import axios from "axios";
+import axiosInstance from "../config/axios";
 
 const useAdminAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
 
   const checkAuth = useCallback(async () => {
     try {
-      await axios.get("http://localhost:8888/api/auth/admin/me", {
-        withCredentials: true,
-      });
+      await axiosInstance.get("/api/auth/admin/me");
       setIsAuthenticated(true);
     } catch {
       setIsAuthenticated(false);

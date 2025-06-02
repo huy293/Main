@@ -10,7 +10,6 @@ logs/
 *.log.*
 
 # .env file (nếu bạn lưu các biến môi trường ở đây)
-.env
 
 # Thư mục build hoặc dist nếu có
 dist/

@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./movie-fe
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://localhost:8888
+      - VITE_API_URL_IMAGE=https://image.tmdb.org/t/p/original
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./Nodejs
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    environment:
+      - NODE_ENV=production
+      - PORT=8888
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=huydev
+      - DB_PASSWORD=29032003
+      - DB_NAME=HH_Movie
+      - CORS_ORIGIN=http://localhost
+      - JWT_SECRET=HH-Movie-Secret-Key-2024
+      - JWT_EXPIRES_IN=24h
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_server
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 22032003
+      MYSQL_DATABASE: HH_Movie
+      MYSQL_USER: huydev
+      MYSQL_PASSWORD: 29032003
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./Nodejs/docker/mysql:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p22032003"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data: 

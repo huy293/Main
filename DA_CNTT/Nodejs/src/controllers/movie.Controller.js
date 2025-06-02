@@ -48,3 +48,12 @@ exports.deleteMovie = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.getAllWithGenres = async (req, res) => {
+  try {
+    const movies = await movieService.GetAllWithGenres();
+    return res.status(200).json(movies);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};

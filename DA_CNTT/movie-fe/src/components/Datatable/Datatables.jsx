@@ -11,12 +11,14 @@ const Datatables = ({ data, columns }) => {
     setCurrentPage(1);
   };
 
-  const handleSort = (key) => {
+  const handleSort = (selector) => {
+    if (typeof selector !== 'function') return;
+    
     let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
+    if (sortConfig.key === selector && sortConfig.direction === "asc") {
       direction = "desc";
     }
-    setSortConfig({ key, direction });
+    setSortConfig({ key: selector, direction });
   };
 
   const handlePerPageChange = (e) => {
@@ -27,10 +29,10 @@ const Datatables = ({ data, columns }) => {
   const sortedData = useMemo(() => {
     let sortableData = [...data];
 
-    if (sortConfig.key) {
+    if (sortConfig.key && typeof sortConfig.key === 'function') {
       sortableData.sort((a, b) => {
-        const aValue = a[sortConfig.key];
-        const bValue = b[sortConfig.key];
+        const aValue = sortConfig.key(a);
+        const bValue = sortConfig.key(b);
 
         if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
         if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
@@ -40,14 +42,17 @@ const Datatables = ({ data, columns }) => {
 
     return sortableData;
   }, [data, sortConfig]);
+
   const removeVietnameseTones = (str) => {
+    if (typeof str !== 'string') return '';
     return str
-      .normalize("NFD") // tách dấu
-      .replace(/[\u0300-\u036f]/g, "") // loại bỏ dấu
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
       .replace(/đ/g, "d")
       .replace(/Đ/g, "D")
       .toLowerCase();
   };
+
   const filteredData = useMemo(() => {
     const keyword = removeVietnameseTones(searchTerm);
     return sortedData.filter((row) =>
@@ -55,11 +60,13 @@ const Datatables = ({ data, columns }) => {
         if (typeof val === "string") {
           return removeVietnameseTones(val).includes(keyword);
         }
+        if (typeof val === "number") {
+          return val.toString().includes(keyword);
+        }
         return false;
       })
     );
   }, [searchTerm, sortedData]);
-  
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
 
@@ -100,7 +107,10 @@ const Datatables = ({ data, columns }) => {
               <th
                 key={index}
                 onClick={() => col.selector && handleSort(col.selector)}
-                className="p-2 cursor-pointer text-left text-sm font-medium text-gray-700 dark:text-white"
+                className={`p-2 text-left text-sm font-medium text-gray-700 dark:text-white ${
+                  col.selector ? 'cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600' : ''
+                }`}
+                style={col.width ? { width: col.width } : {}}
               >
                 {col.name}
                 {sortConfig.key === col.selector &&
@@ -126,12 +136,11 @@ const Datatables = ({ data, columns }) => {
                   <td
                     key={colIndex}
                     className="p-2 text-sm text-gray-800 dark:text-white"
+                    style={col.width ? { width: col.width } : {}}
                   >
-                    {col.render
-                      ? col.render(row)
-                      : col.selector
-                      ? col.selector(row)
-                      : ""}
+                    {col.cell ? col.cell(row) : 
+                     col.render ? col.render(row) :
+                     col.selector ? col.selector(row) : ''}
                   </td>
                 ))}
               </tr>
@@ -148,14 +157,14 @@ const Datatables = ({ data, columns }) => {
           <button
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
             disabled={currentPage === 1}
-            className="px-3 py-1 rounded bg-gray-300 dark:bg-gray-600 hover:bg-gray-400"
+            className="px-3 py-1 rounded bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 disabled:opacity-50"
           >
             Trước
           </button>
           <button
             onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
             disabled={currentPage === totalPages}
-            className="px-3 py-1 rounded bg-gray-300 dark:bg-gray-600 hover:bg-gray-400"
+            className="px-3 py-1 rounded bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 disabled:opacity-50"
           >
             Sau
           </button>

@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../config/axios";
 
 const Login = ({
   onClose,
@@ -14,11 +14,7 @@ const Login = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "http://localhost:8888/api/auth/login",
-        { email, password },
-        { withCredentials: true }
-      );
+      const response = await axiosInstance.post("/api/auth/login", { email, password });
 
       // Kiểm tra nếu không có lỗi từ server
       if (response.status >= 200 && response.status < 300) {

@@ -1,7 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../config/axios";
+
 const Register = ({ onClose, onLoginClick, onVerifyCodeClick }) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -16,10 +17,7 @@ const Register = ({ onClose, onLoginClick, onVerifyCodeClick }) => {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:8888/api/auth/register",
-        { username, email, password }
-      );
+      const response = await axiosInstance.post("/api/auth/register", { username, email, password });
 
       if (response.status >= 200 && response.status < 300) {
         onVerifyCodeClick();

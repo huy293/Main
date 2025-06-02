@@ -20,12 +20,12 @@ const movieCastRoutes = require("./routes/movieCast.routes");
 const movieCrewRoutes = require("./routes/movieCrew.routes");
 const seasonRoutes = require("./routes/season.routes");
 const episodeRoutes = require("./routes/episode.routes");
-
+const dashboardRoutes = require("./routes/dashboard.routes");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: process.env.CORS_ORIGIN || "http://localhost",
   credentials: true
 }));
 
@@ -43,7 +43,15 @@ app.use("/api/movie-cast", movieCastRoutes);
 app.use("/api/movie-crew", movieCrewRoutes);
 app.use("/api/season", seasonRoutes);
 app.use("/api/episode", episodeRoutes);
-
+app.use("/api/dashboard", dashboardRoutes);
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ 
+    error: 'Đã xảy ra lỗi!',
+    details: err.message 
+  });
+});
 
 app.get("/", (req, res) => res.send("Server is running..."));
   

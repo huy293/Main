@@ -1,4 +1,4 @@
-const {Movie} = require("../models");
+const {Movie, Genre, Season, Episode} = require("../models");
 
 const create = async (data) => {
     const newMovie = await Movie.create(data);
@@ -7,7 +7,19 @@ const create = async (data) => {
   
 
 const getAll = async () => {
-  return await Movie.findAll();
+  return await Movie.findAll({
+    include: [
+      {
+        model: Season,
+        attributes: ['id']  // Chỉ lấy id để đếm số lượng
+      },
+      {
+        model: Genre,
+        through: { attributes: [] },
+        attributes: ['name']
+      }
+    ]
+  });
 };
 
 const getById = async (id) => {
@@ -28,10 +40,20 @@ const remove = async (id) => {
   return true;
 };
 
+const GetAllWithGenres = async () => {
+  return await Movie.findAll({
+    include: [{
+      model: Genre,
+      through: { attributes: [] } // Không lấy thông tin từ bảng trung gian
+    }]
+  });
+};
+
 module.exports = {
   create,
   getAll,
   getById,
   update,
   remove,
+  GetAllWithGenres,
 };

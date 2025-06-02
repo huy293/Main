@@ -74,25 +74,34 @@ const Genre = () => {
         }
       );
       console.log("Cập nhật thể loại phim thành công:", response.data);
+      // Reset form
+      setSelectedMovie(null);
+      setSelectedOptions([]);
+      // Trigger reload data
+      setReloadTrigger(prev => !prev);
+      alert("Cập nhật thể loại phim thành công!");
     } catch (error) {
       console.error("Error:", error);
+      alert("Có lỗi xảy ra khi cập nhật thể loại phim!");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    // Gọi API để lấy dữ liệu thể loại
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:8888/api/genre", {
+        // Fetch genres
+        const genreResponse = await axios.get("http://localhost:8888/api/genre", {
           headers: {
             "Content-Type": "application/json",
           },
           withCredentials: true,
         });
+
+        // Fetch movies with genres
         const moviesResponse = await axios.get(
-          "http://localhost:8888/api/movies",
+          "http://localhost:8888/api/movies/with-genres",
           {
             headers: {
               "Content-Type": "application/json",
@@ -100,20 +109,24 @@ const Genre = () => {
             withCredentials: true,
           }
         );
-        const titleMovie = moviesResponse.data.map((movie) => ({
-          id: movie.id,
-          title: movie.title,
+
+        // Format data for dropdowns
+        const movieOptions = moviesResponse.data.map((movie) => ({
+          value: movie.id,
+          label: movie.title,
         }));
-        // Lọc chỉ lấy trường 'name' từ dữ liệu trả về
-        const genreNames = response.data.map((genre) => ({ 
-          id: genre.id,
-          name: genre.name }));
-        setMovies(titleMovie);
-        // Cập nhật state với dữ liệu chỉ chứa 'name'
-        setGenre(genreNames);
+
+        const genreOptions = genreResponse.data.map((genre) => ({
+          value: genre.id,
+          label: genre.name,
+        }));
+
+        setMovies(moviesResponse.data); // For the table
+        setGenre(genreResponse.data); // For the genre management
         setLoading(false);
       } catch (error) {
         console.error("Có lỗi xảy ra khi tải dữ liệu", error);
+        setLoading(false);
       }
     };
 

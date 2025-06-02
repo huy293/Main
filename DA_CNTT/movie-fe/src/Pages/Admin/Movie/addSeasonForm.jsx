@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../../config/axios";
 import "react-toastify/dist/ReactToastify.css";
 
-const AddSeasonForm = ({ onClose }) => {
-  const [Season, setSeason] = useState({
-    SeasonID: "",
+const AddSeasonForm = ({ movieId, mode = "add", initialData = null, onClose, onReload }) => {
+  const [season, setSeason] = useState({
     season_number: "",
     title: "",
     overview: "",
@@ -12,44 +11,62 @@ const AddSeasonForm = ({ onClose }) => {
     poster_url: "",
     backdrop_url: "",
     trailer_url: "",
-    type: "Season", // default to "Season"
+    type: "Season",
     status: "upcoming",
     runtime: "",
+    ...(initialData || {}),
   });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setSeason({ ...Season, [name]: value });
+    setSeason({ ...season, [name]: value });
+    setError(""); // Clear error when user makes changes
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    // Validate required fields
+    if (!season.season_number || !season.title || !season.overview) {
+      setError("Vui lòng điền đầy đủ thông tin: Số mùa, Tiêu đề và Mô tả");
+      setLoading(false);
+      return;
+    }
 
     try {
-      const response = await axios.post(
-        "http://localhost:8888/api/Seasons/",
-        Season,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
-
-      console.log("Season added successfully:", response.data);
+      if (mode === "edit" && initialData?.id) {
+        // Cập nhật season
+        await axiosInstance.put(`/api/season/${initialData.id}`, {
+          ...season,
+          movieId
+        });
+        alert("Cập nhật mùa phim thành công!");
+      } else {
+        // Thêm season mới
+        await axiosInstance.post("/api/season", {
+          ...season,
+          movieId
+        });
+        alert("Thêm mùa phim thành công!");
+      }
+      onReload();
       onClose();
-
-      // Close the modal after successful submission
     } catch (error) {
-      console.error("Error adding Season:", error);
+      console.error("Error:", error);
+      setError(error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="fixed top-0 left-0 z-[999] flex justify-center items-center w-full h-full overflow-x-hidden overflow-y-auto backdrop-blur-sm">
       <div className="bg-gradient-to-r from-gray-800 via-gray-900 to-gray-700 p-8 rounded-xl shadow-2xl w-full max-w-[1300px] relative">
-        {/* Close button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-white text-2xl font-bold"
@@ -57,184 +74,138 @@ const AddSeasonForm = ({ onClose }) => {
           &times;
         </button>
 
-        <h1 className="text-4xl font-extrabold text-yellow-400 text-center mb-8">
-          Add Season
+        <h1 className="text-4xl font-extrabold text-white text-center mb-8">
+          {mode === "edit" ? "Chỉnh sửa mùa phim" : "Thêm mùa phim mới"}
         </h1>
 
-        <form
-          onSubmit={handleSubmit}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          <div className="space-y-6 min-h-full">
-            <div>
-              <label
-                htmlFor="title"
-                className="block text-white font-semibold mb-2"
-              >
-                Season Title
-              </label>
-              <input
-                type="text"
-                name="title"
-                value={Season.title}
-                onChange={handleChange}
-                placeholder="Season Title"
-                className="w-full p-3 bg-gray-800 text-white border border-gray-700 rounded-xl focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 placeholder-gray-400 text-lg"
-                required
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="overview"
-                className="block text-white font-semibold mb-2"
-              >
-                Overview
-              </label>
-              <textarea
-                name="overview"
-                value={Season.overview}
-                onChange={handleChange}
-                placeholder="Overview"
-                className="w-full p-4 bg-gray-700 text-white border border-gray-600 rounded-xl focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 placeholder-gray-400 text-lg h-36"
-                required
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="runtime"
-                className="block text-white font-semibold mb-2"
-              >
-                Runtime (minutes)
-              </label>
-              <input
-                type="number"
-                name="runtime"
-                value={Season.runtime}
-                onChange={handleChange}
-                placeholder="Runtime"
-                className="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-xl focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 placeholder-gray-400 text-lg"
-                required
-              />
-            </div>
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <span className="block sm:inline">{error}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
+          <div>
+            <label className="block text-white mb-2">Số mùa</label>
+            <input
+              type="number"
+              name="season_number"
+              value={season.season_number}
+              onChange={handleChange}
+              className="w-full p-2 rounded bg-gray-700 text-white"
+              required
+            />
           </div>
 
-          {/* Second Column: poster_url, backdrop_url, trailer_url */}
-          <div className="space-y-6 min-h-full">
-            <div>
-              <label
-                htmlFor="poster_url"
-                className="block text-white font-semibold mb-2"
-              >
-                Poster URL
-              </label>
-              <input
-                type="text"
-                name="poster_url"
-                value={Season.poster_url}
-                onChange={handleChange}
-                placeholder="Poster URL"
-                className="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-xl focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 placeholder-gray-400 text-lg"
-                required
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="backdrop_url"
-                className="block text-white font-semibold mb-2"
-              >
-                Backdrop URL
-              </label>
-              <input
-                type="text"
-                name="backdrop_url"
-                value={Season.backdrop_url}
-                onChange={handleChange}
-                placeholder="Backdrop URL"
-                className="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-xl focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 placeholder-gray-400 text-lg"
-                required
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="trailer_url"
-                className="block text-white font-semibold mb-2"
-              >
-                Trailer URL
-              </label>
-              <input
-                type="text"
-                name="trailer_url"
-                value={Season.trailer_url}
-                onChange={handleChange}
-                placeholder="Trailer URL"
-                className="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-xl focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 placeholder-gray-400 text-lg"
-                required
-              />
-            </div>
+          <div>
+            <label className="block text-white mb-2">Tiêu đề</label>
+            <input
+              type="text"
+              name="title"
+              value={season.title}
+              onChange={handleChange}
+              className="w-full p-2 rounded bg-gray-700 text-white"
+              required
+            />
           </div>
 
-          {/* Third Column: type, status, release_date */}
-          <div className="space-y-6 min-h-auto">
-            <div>
-              <label
-                htmlFor="type"
-                className="block text-white font-semibold mb-2"
-              >
-                Type
-              </label>
-              <select
-                name="type"
-                value={Season.type}
-                onChange={handleChange}
-                className="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-xl focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 text-lg"
-                required
-              >
-                <option value="Season">Season</option>
-                <option value="series">Series</option>
-              </select>
-            </div>
-            <div>
-              <label
-                htmlFor="status"
-                className="block text-white font-semibold mb-2"
-              >
-                Status
-              </label>
-              <select
-                name="status"
-                value={Season.status}
-                onChange={handleChange}
-                className="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-xl focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 text-lg"
-                required
-              >
-                <option value="upcoming">Upcoming</option>
-                <option value="released">Released</option>
-                <option value="canceled">Canceled</option>
-              </select>
-            </div>
-            <div>
-              <label
-                htmlFor="release_date"
-                className="block text-white font-semibold mb-2"
-              >
-                Release Date
-              </label>
-              <input
-                type="date"
-                name="release_date"
-                value={Season.release_date}
-                onChange={handleChange}
-                className="w-full p-3 bg-gray-800 text-white border border-gray-700 rounded-xl focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 placeholder-gray-400 text-lg"
-                required
-              />
-            </div>
+          <div className="col-span-2">
+            <label className="block text-white mb-2">Mô tả</label>
+            <textarea
+              name="overview"
+              value={season.overview}
+              onChange={handleChange}
+              className="w-full p-2 rounded bg-gray-700 text-white"
+              rows="4"
+              required
+            />
           </div>
-          <div className="col-span-3 mt-6">
+
+          <div>
+            <label className="block text-white mb-2">Ngày phát hành</label>
+            <input
+              type="date"
+              name="release_date"
+              value={season.release_date}
+              onChange={handleChange}
+              className="w-full p-2 rounded bg-gray-700 text-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-white mb-2">Thời lượng (phút)</label>
+            <input
+              type="number"
+              name="runtime"
+              value={season.runtime}
+              onChange={handleChange}
+              className="w-full p-2 rounded bg-gray-700 text-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-white mb-2">URL Poster</label>
+            <input
+              type="text"
+              name="poster_url"
+              value={season.poster_url}
+              onChange={handleChange}
+              className="w-full p-2 rounded bg-gray-700 text-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-white mb-2">URL Backdrop</label>
+            <input
+              type="text"
+              name="backdrop_url"
+              value={season.backdrop_url}
+              onChange={handleChange}
+              className="w-full p-2 rounded bg-gray-700 text-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-white mb-2">URL Trailer</label>
+            <input
+              type="text"
+              name="trailer_url"
+              value={season.trailer_url}
+              onChange={handleChange}
+              className="w-full p-2 rounded bg-gray-700 text-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-white mb-2">Trạng thái</label>
+            <select
+              name="status"
+              value={season.status}
+              onChange={handleChange}
+              className="w-full p-2 rounded bg-gray-700 text-white"
+            >
+              <option value="upcoming">Sắp ra mắt</option>
+              <option value="ongoing">Đang diễn ra</option>
+              <option value="completed">Đã hoàn thành</option>
+            </select>
+          </div>
+
+          <div className="col-span-2 text-center mt-6">
             <button
               type="submit"
-              className="w-full p-4 bg-yellow-400 text-gray-900 font-bold rounded-xl hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition duration-300 text-lg"
+              disabled={loading}
+              className={`${
+                loading 
+                  ? "bg-gray-500 cursor-not-allowed" 
+                  : "bg-blue-600 hover:bg-blue-700"
+              } text-white px-8 py-3 rounded-lg font-semibold`}
             >
-              Add Season
+              {loading 
+                ? "Đang xử lý..." 
+                : mode === "edit" 
+                  ? "Cập nhật" 
+                  : "Thêm mới"
+              }
             </button>
           </div>
         </form>

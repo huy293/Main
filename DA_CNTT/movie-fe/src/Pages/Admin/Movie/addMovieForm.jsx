@@ -1,12 +1,20 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../../config/axios";
 import "react-toastify/dist/ReactToastify.css";
+import FormSkeleton from "../../../components/Skeleton/FormSkeleton";
 
-const AddMovieForm = ({ onClose }) => {
+const AddMovieForm = ({
+  mode = "add",
+  initialData = null,
+  onClose,
+  onReload,
+}) => {
   const [movie, setMovie] = useState({
     title: "",
-    type: "movie", // default to "movie"
+    type: "movie",
+    ...(initialData || {}), // nếu có dữ liệu ban đầu thì fill vào
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -15,25 +23,26 @@ const AddMovieForm = ({ onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
-      const response = await axios.post(
-        "http://localhost:8888/api/movies/",
-        movie,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+      if (mode === "edit") {
+        await axiosInstance.put(`/api/movies/${initialData.id}`, movie);
+        console.log("Cập nhật phim thành công");
+      } else {
+        await axiosInstance.post("/api/movies", movie);
+        console.log("Thêm phim thành công");
+      }
 
-      console.log("Movie added successfully:", response.data);
+      onReload();
       onClose();
     } catch (error) {
-      console.error("Error adding movie:", error);
+      console.error("Lỗi khi submit form:", error);
+    } finally {
+      setLoading(false);
     }
   };
+  
 
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
@@ -42,61 +51,73 @@ const AddMovieForm = ({ onClose }) => {
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-white text-2xl font-bold hover:text-blue-400 transition duration-300"
+          disabled={loading}
         >
           &times;
         </button>
 
-        <h1 className="text-4xl font-extrabold text-white text-center mb-6">
-          Thêm phim mới
-        </h1>
+        {loading ? (
+          <FormSkeleton fields={2} />
+        ) : (
+          <>
+            <h1 className="text-4xl font-extrabold text-white text-center mb-6">
+              {mode === "edit" ? "Chỉnh sửa phim" : "Thêm phim mới"}
+            </h1>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
-          <div>
-            <label
-              htmlFor="title"
-              className="block text-white font-semibold mb-2"
-            >
-              Tiêu đề phim
-            </label>
-            <input
-              type="text"
-              name="title"
-              value={movie.title}
-              onChange={handleChange}
-              placeholder="Nhập tiêu đề phim"
-              className="w-full p-4 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 placeholder-gray-400 text-lg"
-              required
-            />
-          </div>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
+              <div>
+                <label
+                  htmlFor="title"
+                  className="block text-white font-semibold mb-2"
+                >
+                  Tiêu đề phim
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  value={movie.title}
+                  onChange={handleChange}
+                  placeholder="Nhập tiêu đề phim"
+                  className="w-full p-4 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 placeholder-gray-400 text-lg"
+                  required
+                />
+              </div>
 
-          <div>
-            <label
-              htmlFor="type"
-              className="block text-white font-semibold mb-2"
-            >
-              Thể loại
-            </label>
-            <select
-              name="type"
-              value={movie.type}
-              onChange={handleChange}
-              className="w-full p-4 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-lg"
-              required
-            >
-              <option value="movie">Phim</option>
-              <option value="series">Series</option>
-            </select>
-          </div>
+              <div>
+                <label
+                  htmlFor="type"
+                  className="block text-white font-semibold mb-2"
+                >
+                  Thể loại
+                </label>
+                <select
+                  name="type"
+                  value={movie.type}
+                  onChange={handleChange}
+                  className="w-full p-4 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-lg"
+                  required
+                >
+                  <option value="movie">Phim lẻ</option>
+                  <option value="series">Phim bộ</option>
+                </select>
+              </div>
 
-          <div className="mt-6">
-            <button
-              type="submit"
-              className="w-full p-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 text-lg"
-            >
-              Thêm phim
-            </button>
-          </div>
-        </form>
+              <div className="mt-6">
+                <button
+                  type="submit"
+                  className={`w-full p-4 ${
+                    mode === "edit"
+                      ? "bg-yellow-600 hover:bg-yellow-700"
+                      : "bg-blue-600 hover:bg-blue-700"
+                  } text-white font-bold rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 text-lg`}
+                  disabled={loading}
+                >
+                  {mode === "edit" ? "Lưu thay đổi" : "Thêm phim"}
+                </button>
+              </div>
+            </form>
+          </>
+        )}
       </div>
     </div>
   );

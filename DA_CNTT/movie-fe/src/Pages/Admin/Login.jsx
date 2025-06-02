@@ -1,19 +1,17 @@
 import React, { useState } from "react";
 import imgbg from "../../assets/ecb6416c16b66e9e5409def9271224a2.gif";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../config/axios";
+
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "http://localhost:8888/api/auth/login",
-        { email, password },
-        { withCredentials: true }
-      );
+      const response = await axiosInstance.post("/api/auth/login", { email, password });
 
       // Kiểm tra nếu không có lỗi từ server
       if (response.status >= 200 && response.status < 300) {
