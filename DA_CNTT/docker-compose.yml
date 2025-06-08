@@ -1,5 +1,6 @@
 version: '3.8'
 
+
 services:
   frontend:
     build:
@@ -9,11 +10,13 @@ services:
       - "80:80"
     depends_on:
       - backend
-    environment:
-      - VITE_API_URL=http://localhost:8888
-      - VITE_API_URL_IMAGE=https://image.tmdb.org/t/p/original
+    env_file:
+      - ./movie-fe/.env
     networks:
       - app-network
+    volumes:
+      - ./movie-fe:/app
+      - /app/node_modules
 
   backend:
     build:
@@ -21,36 +24,26 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8888:8888"
-    environment:
-      - NODE_ENV=production
-      - PORT=8888
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_USER=huydev
-      - DB_PASSWORD=29032003
-      - DB_NAME=HH_Movie
-      - CORS_ORIGIN=http://localhost
-      - JWT_SECRET=HH-Movie-Secret-Key-2024
-      - JWT_EXPIRES_IN=24h
+    env_file:
+      - ./Nodejs/.env
     depends_on:
       - mysql
     networks:
       - app-network
+    volumes:
+      - ./Nodejs:/app
+      - /app/node_modules
 
   mysql:
     image: mysql:8.0
     container_name: mysql_server
     restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: 22032003
-      MYSQL_DATABASE: HH_Movie
-      MYSQL_USER: huydev
-      MYSQL_PASSWORD: 29032003
+    env_file:
+      - ./Nodejs/.env
     ports:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./Nodejs/docker/mysql:/docker-entrypoint-initdb.d
     networks:
       - app-network
     healthcheck:

@@ -1,7 +1,5 @@
-# Use Node.js image
-FROM node:18
+FROM node:18-alpine
 
-# Set working directory
 WORKDIR /app
 
 # Copy package files
@@ -10,7 +8,7 @@ COPY package*.json ./
 # Install dependencies
 RUN npm install
 
-# Copy all files
+# Copy source code
 COPY . .
 
 # Create .env file from environment variables
@@ -25,8 +23,6 @@ CORS_ORIGIN=\${CORS_ORIGIN}\n\
 JWT_SECRET=\${JWT_SECRET}\n\
 JWT_EXPIRES_IN=\${JWT_EXPIRES_IN}" > .env
 
-# Expose port 8888
 EXPOSE 8888
 
-# Start the application
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev"]
