@@ -12,10 +12,10 @@ router.post('/', controller.addCrewToMovie);
 router.get('/movie/:seasonId', controller.getCrewsOfMovie);
 
 // PUT: Cập nhật công việc
-router.put('/:movieId/:peopleId', controller.updateCrewJob);
+router.put('/:seasonId/:peopleId', controller.updateCrewJob);
 
 // DELETE: Xoá crew khỏi phim
-router.delete('/:movieId/:peopleId', controller.removeCrewFromMovie);
+router.delete('/:seasonId/:peopleId', controller.removeCrewFromMovie);
 
 // GET: Lấy danh sách phim người đó từng làm crew
 router.get('/person/:peopleId', controller.getMoviesOfCrew);

@@ -23,7 +23,18 @@ const getAll = async () => {
 };
 
 const getById = async (id) => {
-  return await Movie.findByPk(id);
+  return await Movie.findByPk(id, {
+    include: [
+      {
+        model: Genre,
+        through: { attributes: [] }
+      },
+      {
+        model: Season,
+        include: [Episode]
+      }
+    ]
+  });
 };
 
 const update = async (id, data) => {

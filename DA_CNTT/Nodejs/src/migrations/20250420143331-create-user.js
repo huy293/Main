@@ -30,6 +30,10 @@ module.exports = {
         type: Sequelize.STRING,
         defaultValue: 'user',
       },
+      status: {
+        type: Sequelize.ENUM('active', 'locked'),
+        defaultValue: 'active'
+      },
       createdAt: {
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW,

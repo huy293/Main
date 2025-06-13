@@ -1,26 +1,26 @@
 {
   "development": {
     "username": "huydev",
-    "password": "29032003",
+    "password": "22032003",
     "database": "HH_Movie",
-    "host": "localhost",
+    "host": "mysql",
     "dialect": "mysql",
-    "port": 3307 
+    "port": 3306 
   },
   "test": {
     "username": "huydev",
-    "password": "29032003",
+    "password": "22032003",
     "database": "HH_Movie",
-    "host": "localhost",
+    "host": "mysql",
     "dialect": "mysql",
-    "port": 3307 
+    "port": 3306 
   },
   "production": {
     "username": "huydev",
-    "password": "29032003",
+    "password": "22032003",
     "database": "HH_Movie",
-    "host": "localhost",
+    "host": "mysql",
     "dialect": "mysql",
-    "port": 3307 
+    "port": 3306 
   }
 }

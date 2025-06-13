@@ -1,4 +1,4 @@
-const moviegenreColumns = [
+const moviegenreColumns = (onEdit, onDelete) => [
   {
     name: "Tên phim",
     selector: (row) => row.title,

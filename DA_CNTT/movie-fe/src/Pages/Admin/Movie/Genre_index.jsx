@@ -5,25 +5,90 @@ import moviegenreColumns from "../../../components/Datatable/column/moviegenreCo
 import genreColumns from "../../../components/Datatable/column/genreColumns";
 import Select from "react-select";
 import axios from "axios";
+import axiosInstance from "../../../config/axios";
 
 const Genre = () => {
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [name, setName] = useState(""); // State lưu tên thể loại
-  const [loading, setLoading] = useState(true); // Trạng thái loading khi gửi dữ liệu
+  const [loading, setLoading] = useState(false); // Khởi tạo là false
   const [genres, setGenre] = useState([]);
   const [movies, setMovies] = useState([]);
   const [reloadTrigger, setReloadTrigger] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null); // Selected movie ID
+  const [editingGenre, setEditingGenre] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false); // Thêm state để phân biệt giữa thêm mới và sửa
+
+  // Hàm xử lý sửa thể loại
+  const handleEditGenre = (genre) => {
+    setEditingGenre(genre);
+    setName(genre.name);
+    setShowModal(true);
+  };
+
+  // Hàm xử lý xóa thể loại
+  const handleDeleteGenre = async (genre) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa thể loại "${genre.name}"?`)) {
+      try {
+        setLoading(true);
+        await axiosInstance.delete(`/api/genre/${genre.id}`);
+        alert("Xóa thể loại thành công!");
+        setReloadTrigger(prev => !prev); // Reload data
+      } catch (error) {
+        console.error("Error deleting genre:", error);
+        alert("Có lỗi xảy ra khi xóa thể loại!");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  // Hàm xử lý sửa thể loại phim
+  const handleEditMovieGenre = (movie) => {
+    setIsEditing(true); // Đánh dấu đang ở chế độ sửa
+    setSelectedMovie(movie.id);
+    // Set các thể loại hiện tại của phim vào selectedOptions
+    const currentGenres = movie.Genres.map(genre => ({
+      label: genre.name,
+      value: genre.id
+    }));
+    setSelectedOptions(currentGenres);
+  };
+
+  // Hàm xử lý xóa thể loại phim
+  const handleDeleteMovieGenre = async (movie) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa tất cả thể loại của phim "${movie.title}"?`)) {
+      try {
+        setLoading(true);
+        await axiosInstance.put(`/api/movie-genre/${movie.id}`, { genreIds: [] });
+        alert("Xóa thể loại phim thành công!");
+        setReloadTrigger(prev => !prev); // Reload data
+      } catch (error) {
+        console.error("Error deleting movie genres:", error);
+        alert("Có lỗi xảy ra khi xóa thể loại phim!");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   // Hàm đóng form và hiển thị thông báo toast
   const handleCloseAddMovieForm = (sc) => {
     setShowAddMovieForm(false);
   };
+
   const handleChangegenre = (e) => {
     setName(e.target.value);
   };
+
   const handleChangeMovie = (selected) => {
     setSelectedMovie(selected ? selected.value : null);
+    if (!selected) {
+      setIsEditing(false); // Reset trạng thái sửa khi không chọn phim
+      setSelectedOptions([]); // Reset thể loại đã chọn
+    }
   };
+
   const handleSubmitgenre = async (e) => {
     e.preventDefault(); // Ngăn chặn reload trang khi submit form
 
@@ -31,23 +96,22 @@ const Genre = () => {
       return;
     }
     try {
-      const response = await axios.post(
-        "http://localhost:8888/api/genre/",
-        { name }, // Dữ liệu gửi lên API
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
-
-      setReloadTrigger((prev) => !prev); // Đảo trạng thái để kích hoạt useEffect
       setLoading(true);
-      console.log("Thêm thể loại thành công:", response.data);
-      setName(""); // Xóa input sau khi thêm thành công
+      if (editingGenre) {
+        // Sử dụng API sửa khi đang ở chế độ sửa
+        await axiosInstance.put(`/api/genre/${editingGenre.id}`, { name });
+        alert("Cập nhật thể loại thành công!");
+      } else {
+        // Sử dụng API thêm khi thêm mới
+        await axiosInstance.post("/api/genre", { name });
+        alert("Thêm thể loại thành công!");
+      }
+      setReloadTrigger((prev) => !prev); // Đảo trạng thái để kích hoạt useEffect
+      setName(""); // Xóa input sau khi thêm/sửa thành công
+      setEditingGenre(null); // Reset trạng thái sửa
     } catch (err) {
       console.error("Error:", err);
+      alert("Có lỗi xảy ra khi lưu thể loại!");
     } finally {
       setLoading(false);
     }
@@ -63,20 +127,12 @@ const Genre = () => {
 
     try {
       setLoading(true);
-      const response = await axios.put(
-        `http://localhost:8888/api/movie-genre/${selectedMovie}`,
-        { genreIds },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+      const response = await axiosInstance.put(`/api/movie-genre/${selectedMovie}`, { genreIds });
       console.log("Cập nhật thể loại phim thành công:", response.data);
       // Reset form
       setSelectedMovie(null);
       setSelectedOptions([]);
+      setIsEditing(false); // Reset trạng thái sửa
       // Trigger reload data
       setReloadTrigger(prev => !prev);
       alert("Cập nhật thể loại phim thành công!");
@@ -88,50 +144,47 @@ const Genre = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch genres
-        const genreResponse = await axios.get("http://localhost:8888/api/genre", {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        });
-
-        // Fetch movies with genres
-        const moviesResponse = await axios.get(
-          "http://localhost:8888/api/movies/with-genres",
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-            withCredentials: true,
-          }
-        );
-
-        // Format data for dropdowns
-        const movieOptions = moviesResponse.data.map((movie) => ({
-          value: movie.id,
-          label: movie.title,
-        }));
-
-        const genreOptions = genreResponse.data.map((genre) => ({
-          value: genre.id,
-          label: genre.name,
-        }));
-
-        setMovies(moviesResponse.data); // For the table
-        setGenre(genreResponse.data); // For the genre management
-        setLoading(false);
-      } catch (error) {
-        console.error("Có lỗi xảy ra khi tải dữ liệu", error);
-        setLoading(false);
+  const handleSubmit = async (formData) => {
+    try {
+      setLoading(true);
+      if (editingGenre) {
+        await axiosInstance.put(`/api/genre/${editingGenre.id}`, formData);
+        alert("Cập nhật thể loại thành công!");
+      } else {
+        await axiosInstance.post("/api/genre", formData);
+        alert("Thêm thể loại thành công!");
       }
-    };
+      fetchGenres();
+      setShowModal(false);
+      setEditingGenre(null);
+      setName(""); // Reset form
+    } catch (error) {
+      console.error("Error saving genre:", error);
+      alert("Có lỗi xảy ra khi lưu thể loại");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchData();
+  const fetchGenres = async () => {
+    try {
+      setLoading(true);
+      const genreResponse = await axiosInstance.get("/api/genre");
+      setGenre(genreResponse.data);
+
+      const moviesResponse = await axiosInstance.get("/api/movies");
+      setMovies(moviesResponse.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGenres();
   }, [reloadTrigger]);
+
   return (
     <div className="min-h-screen flex items-start justify-start bg-gray-900 p-6 sm:ml-64">
       <div className="flex flex-wrap 2xl:flex-nowrap gap-6 max-w-screen-xl">
@@ -147,7 +200,7 @@ const Genre = () => {
               <p className="text-gray-600">Đang tải dữ liệu...</p>
             ) : (
               <Datatables
-                columns={genreColumns}
+                columns={genreColumns(handleEditGenre, handleDeleteGenre)}
                 data={genres}
                 tableId="table-1"
               />
@@ -159,7 +212,7 @@ const Genre = () => {
             <div className="p-4 border-2 border-dashed rounded-lg border-gray-200 dark:border-gray-700 2xl:mt-14 w-[400px] h-52">
               <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-                  Thêm thể loại
+                  {editingGenre ? "Sửa thể loại" : "Thêm thể loại"}
                 </h1>
               </div>
 
@@ -179,20 +232,33 @@ const Genre = () => {
                   Tên thể loại
                 </label>
               </div>
-              <button
-                type="submit"
-                className="mt-4 w-full bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-                onClick={handleSubmitgenre}
-                disabled={loading} // Vô hiệu hóa nút khi đang gửi dữ liệu
-              >
-                {loading ? "Đang thêm..." : "Thêm"}
-              </button>
+              <div className="flex gap-2 mt-4">
+                {editingGenre && (
+                  <button
+                    onClick={() => {
+                      setEditingGenre(null);
+                      setName("");
+                    }}
+                    className="w-full bg-gray-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors"
+                  >
+                    Hủy
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  className={`${editingGenre ? 'w-full' : 'w-full'} bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors`}
+                  onClick={handleSubmitgenre}
+                  disabled={loading}
+                >
+                  {loading ? "Đang lưu..." : editingGenre ? "Lưu" : "Thêm"}
+                </button>
+              </div>
             </div>
 
             <div className="p-4 border-2 border-dashed rounded-lg border-gray-200 dark:border-gray-700 2xl:mt-14 w-[400px]">
               <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-                  Thêm phim - thể loại
+                  {isEditing ? "Sửa phim - thể loại" : "Thêm phim - thể loại"}
                 </h1>
               </div>
 
@@ -205,64 +271,13 @@ const Genre = () => {
                     })) || []
                   } // Default to empty array if movies is undefined or null
                   onChange={handleChangeMovie}
+                  value={selectedMovie ? movies.find(m => m.id === selectedMovie) ? {
+                    label: movies.find(m => m.id === selectedMovie).title,
+                    value: selectedMovie
+                  } : null : null}
                   placeholder="Chọn phim..."
                   isSearchable={true}
-                  styles={{
-                    control: (base, state) => ({
-                      ...base,
-                      backgroundColor: "transparent",
-                      borderColor: state.isFocused ? "#3b82f6" : "#9ca3af", // blue-500 / gray-400
-                      boxShadow: "none",
-                      "&:hover": {
-                        borderColor: "#3b82f6",
-                      },
-                      color: "#fff",
-                    }),
-                    singleValue: (base) => ({
-                      ...base,
-                      color: "#fff",
-                    }),
-                    input: (base) => ({
-                      ...base,
-                      color: "#fff",
-                    }),
-                    placeholder: (base) => ({
-                      ...base,
-                      color: "#9ca3af", // text-gray-400
-                    }),
-                    menu: (base) => ({
-                      ...base,
-                      backgroundColor: "#1f2937", // gray-800
-                      color: "#fff",
-                    }),
-                    option: (base, state) => ({
-                      ...base,
-                      backgroundColor: state.isFocused
-                        ? "#2563eb"
-                        : "transparent", // blue-600
-                      color: state.isFocused ? "#fff" : "#fff",
-                      "&:hover": {
-                        backgroundColor: "#2563eb",
-                        color: "#fff",
-                      },
-                    }),
-                  }}
-                />
-
-                <Select
-                  isMulti // Cho phép chọn nhiều
-                  name="options"
-                  options={genres.map((genre) => ({
-                    label: genre.name,
-                    value: genre.id,
-                  }))}
-                  value={selectedOptions}
-                  onChange={setSelectedOptions}
-                  className="basic-multi-select mt-5"
-                  classNamePrefix="select"
-                  placeholder="Chọn thể loại..."
-                  getOptionLabel={(e) => e.label} // Đảm bảo label hiển thị đúng
-                  getOptionValue={(e) => e.value} // Đảm bảo value là ID
+                  isDisabled={isEditing} // Disable select khi đang ở chế độ sửa
                   styles={{
                     control: (base, state) => ({
                       ...base,
@@ -305,14 +320,85 @@ const Genre = () => {
                   }}
                 />
               </div>
-              <button
-                type="submit"
-                className="mt-4 w-full bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-                onClick={handleSubmitMovieGenre}
-                disabled={loading}
-              >
-                Thêm
-              </button>
+
+              <Select
+                isMulti // Cho phép chọn nhiều
+                name="options"
+                options={genres.map((genre) => ({
+                  label: genre.name,
+                  value: genre.id,
+                }))}
+                value={selectedOptions}
+                onChange={setSelectedOptions}
+                className="basic-multi-select mt-5"
+                classNamePrefix="select"
+                placeholder="Chọn thể loại..."
+                getOptionLabel={(e) => e.label} // Đảm bảo label hiển thị đúng
+                getOptionValue={(e) => e.value} // Đảm bảo value là ID
+                styles={{
+                  control: (base, state) => ({
+                    ...base,
+                    backgroundColor: "transparent",
+                    borderColor: state.isFocused ? "#3b82f6" : "#9ca3af", // blue-500 / gray-400
+                    boxShadow: "none",
+                    "&:hover": {
+                      borderColor: "#3b82f6",
+                    },
+                    color: "#fff",
+                  }),
+                  singleValue: (base) => ({
+                    ...base,
+                    color: "#fff",
+                  }),
+                  input: (base) => ({
+                    ...base,
+                    color: "#fff",
+                  }),
+                  placeholder: (base) => ({
+                    ...base,
+                    color: "#9ca3af", // text-gray-400
+                  }),
+                  menu: (base) => ({
+                    ...base,
+                    backgroundColor: "#1f2937", // gray-800
+                    color: "#fff",
+                  }),
+                  option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isFocused
+                      ? "#2563eb"
+                      : "transparent", // blue-600
+                    color: state.isFocused ? "#fff" : "#fff",
+                    "&:hover": {
+                      backgroundColor: "#2563eb",
+                      color: "#fff",
+                    },
+                  }),
+                }}
+              />
+
+              <div className="flex gap-2 mt-4">
+                {isEditing && (
+                  <button
+                    onClick={() => {
+                      setIsEditing(false);
+                      setSelectedMovie(null);
+                      setSelectedOptions([]);
+                    }}
+                    className="w-full bg-gray-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors"
+                  >
+                    Hủy
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  className={`${isEditing ? 'w-full' : 'w-full'} bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors`}
+                  onClick={handleSubmitMovieGenre}
+                  disabled={loading}
+                >
+                  {loading ? "Đang lưu..." : isEditing ? "Lưu" : "Thêm"}
+                </button>
+              </div>
             </div>
           </div>
           <div className="p-4 border-2 border-dashed rounded-lg border-gray-200 dark:border-gray-700 mt-14 w-full">
@@ -324,7 +410,7 @@ const Genre = () => {
 
             <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
               <Datatables
-                columns={moviegenreColumns}
+                columns={moviegenreColumns(handleEditMovieGenre, handleDeleteMovieGenre)}
                 data={movies}
                 tableId="table-2"
               />

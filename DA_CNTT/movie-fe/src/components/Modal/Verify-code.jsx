@@ -1,25 +1,26 @@
-import React from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom";
-import { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../config/axios";
 
 const VerifyCode = ({ onClose, onLoginClick, onRegisterClick }) => {
   const [userInputCode, setCode] = useState("");
+  const [error, setError] = useState("");
+  const email = localStorage.getItem('verifyEmail');
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "http://localhost:8888/api/auth/verify-email",
-        { userInputCode }
-      );
-
-      // Kiểm tra nếu không có lỗi từ server
-      if (response.status >= 200 && response.status < 300) {
-        onLoginClick(); // Chuyển qua màn hình login
+      const response = await axiosInstance.post("/api/auth/verify", {
+        email,
+        code: userInputCode
+      });
+      
+      if (response.data.success) {
+        localStorage.removeItem('verifyEmail'); // Xóa email sau khi verify thành công
+        onLoginClick();
       }
     } catch (error) {
-      // Bắt lỗi dễ dàng hơn
-      alert(error.response?.data?.message || "Verification failed!");
+      setError(error.response?.data?.message || "Có lỗi xảy ra khi xác thực mã");
     }
   };
 

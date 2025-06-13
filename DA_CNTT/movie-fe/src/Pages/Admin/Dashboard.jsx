@@ -1,74 +1,104 @@
-import React, { useState, useEffect } from "react";
-import AreaChart from "../../components/Charts/AreaChart";
+import React, { useEffect, useState } from "react";
 import LineChart from "../../components/Charts/LineChart";
 import DonutChart from "../../components/Charts/DonutChart";
 import BarChart from "../../components/Charts/BarChart";
-import RadialChart from "../../components/Charts/RadialChart";
-import CardSkeleton from "../../components/Skeleton/CardSkeleton";
-import ChartSkeleton from "../../components/Skeleton/ChartSkeleton";
-import ActivitySkeleton from "../../components/Skeleton/ActivitySkeleton";
-import axiosInstance from "../../config/axios";
+import PieChart from "../../components/Charts/PieChart";
+import ColumnChart from "../../components/Charts/ColumnChart";
+
+// Statistic Card component
+const StatCard = ({ label, value, color = "blue" }) => {
+  const colorMap = {
+    blue: "text-blue-600 dark:text-blue-400",
+    green: "text-green-600 dark:text-green-400",
+    purple: "text-purple-600 dark:text-purple-400",
+    orange: "text-orange-600 dark:text-orange-400",
+    pink: "text-pink-600 dark:text-pink-400",
+    yellow: "text-yellow-600 dark:text-yellow-400",
+    indigo: "text-indigo-600 dark:text-indigo-400",
+    red: "text-red-600 dark:text-red-400",
+  };
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 flex flex-col items-center shadow">
+      <div className="text-gray-500 text-sm">{label}</div>
+      <div className={`text-2xl font-bold ${colorMap[color] || colorMap.blue}`}>{value}</div>
+    </div>
+  );
+};
 
 const Dashboard = () => {
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
+  // Tổng quan
+  const [summary, setSummary] = useState({
     totalMovies: 0,
     totalUsers: 0,
     totalEpisodes: 0,
     totalRatings: 0,
     totalComments: 0,
-    averageRating: "0"
+    averageRating: 0,
   });
+
+  // Chart & datatable data
   const [monthlyViews, setMonthlyViews] = useState([]);
   const [genreDistribution, setGenreDistribution] = useState([]);
-  const [recentActivities, setRecentActivities] = useState([]);
-  const [topMovies, setTopMovies] = useState([]);
-  const [completionRate, setCompletionRate] = useState({
-    totalEpisodes: 0,
-    completedViews: 0,
-    completionRate: "0"
-  });
+  const [topSeasons, setTopSeasons] = useState([]);
+  const [topUsers, setTopUsers] = useState([]);
+  const [topFavoriteSeasons, setTopFavoriteSeasons] = useState([]);
+  const [topRatedSeasons, setTopRatedSeasons] = useState([]);
+  const [newUsers, setNewUsers] = useState([]);
+  const [newSeasons, setNewSeasons] = useState([]);
+  const [userRoleDistribution, setUserRoleDistribution] = useState([]);
+  const [commentsByMonth, setCommentsByMonth] = useState([]);
+  const [completionRate, setCompletionRate] = useState({ totalEpisodes: 0, completedViews: 0, completionRate: 0 });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        
-        // Fetch overall statistics
-        const statsResponse = await axiosInstance.get('/api/dashboard/stats');
-        setStats(statsResponse.data);
+        // Tổng quan
+        const resSummary = await fetch("/api/dashboard/stats");
+        setSummary(await resSummary.json());
 
-        // Fetch monthly views
-        const viewsResponse = await axiosInstance.get('/api/dashboard/monthly-views');
-        setMonthlyViews(viewsResponse.data);
-
-        // Fetch genre distribution
-        const genreResponse = await axiosInstance.get('/api/dashboard/genre-distribution');
-        setGenreDistribution(genreResponse.data.map(genre => ({
-          name: genre.name,
-          value: genre.movieCount
-        })));
-
-        // Fetch recent activities
-        const activitiesResponse = await axiosInstance.get('/api/dashboard/recent-activities');
-        setRecentActivities(activitiesResponse.data);
-
-        // Fetch top movies
-        const topMoviesResponse = await axiosInstance.get('/api/dashboard/top-movies');
-        setTopMovies(topMoviesResponse.data.map(movie => ({
-          name: movie.title,
-          value: movie.viewCount
-        })));
-
-        // Fetch completion rate
-        const completionResponse = await axiosInstance.get('/api/dashboard/completion-rate');
-        setCompletionRate(completionResponse.data);
-
+        // Các thống kê khác
+        const [
+          resViews,
+          resGenre,
+          resTopSeasons,
+          resTopUsers,
+          resTopFav,
+          resTopRated,
+          resNewUsers,
+          resNewSeasons,
+          resUserRole,
+          resComments,
+          resCompletion,
+        ] = await Promise.all([
+          fetch("/api/dashboard/monthly-views"),
+          fetch("/api/dashboard/genre-distribution"),
+          fetch("/api/dashboard/top-seasons"),
+          fetch("/api/dashboard/top-users"),
+          fetch("/api/dashboard/top-favorite-movies"),
+          fetch("/api/dashboard/top-rated-seasons"),
+          fetch("/api/dashboard/newest-users"),
+          fetch("/api/dashboard/newest-seasons"),
+          fetch("/api/dashboard/user-role-distribution"),
+          fetch("/api/dashboard/comments-by-month"),
+          fetch("/api/dashboard/completion-rate"),
+        ]);
+        setMonthlyViews(await resViews.json());
+        setGenreDistribution(await resGenre.json());
+        setTopSeasons(await resTopSeasons.json());
+        setTopUsers(await resTopUsers.json());
+        setTopFavoriteSeasons(await resTopFav.json());
+        setTopRatedSeasons(await resTopRated.json());
+        setNewUsers(await resNewUsers.json());
+        setNewSeasons(await resNewSeasons.json());
+        setUserRoleDistribution(await resUserRole.json());
+        setCommentsByMonth(await resComments.json());
+        setCompletionRate(await resCompletion.json());
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+        console.error("Error fetching dashboard data:", error);
       } finally {
-        // Simulating loading delay for better UX
-        setTimeout(() => setLoading(false), 1000);
+        setLoading(false);
       }
     };
 
@@ -77,129 +107,172 @@ const Dashboard = () => {
 
   return (
     <div className="p-4 sm:ml-64 dark:bg-gray-900 min-h-screen">
-      <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
-        {/* Quick Stats */}
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Tổng quan</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {loading ? (
-              <>
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-              </>
-            ) : (
-              <>
-                <div className="flex flex-col justify-center items-center p-4 rounded-sm bg-gray-50 dark:bg-gray-800 shadow">
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">Tổng số phim</p>
-                  <p className="text-2xl font-bold text-gray-800 dark:text-white">{stats.totalMovies}</p>
-                </div>
-                <div className="flex flex-col justify-center items-center p-4 rounded-sm bg-gray-50 dark:bg-gray-800 shadow">
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">Tổng người dùng</p>
-                  <p className="text-2xl font-bold text-gray-800 dark:text-white">{stats.totalUsers}</p>
-                </div>
-                <div className="flex flex-col justify-center items-center p-4 rounded-sm bg-gray-50 dark:bg-gray-800 shadow">
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">Tổng tập phim</p>
-                  <p className="text-2xl font-bold text-gray-800 dark:text-white">{stats.totalEpisodes}</p>
-                </div>
-                <div className="flex flex-col justify-center items-center p-4 rounded-sm bg-gray-50 dark:bg-gray-800 shadow">
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">Đánh giá trung bình</p>
-                  <p className="text-2xl font-bold text-yellow-500">{stats.averageRating}/5 ⭐</p>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
+      <div className="p-4 border-2 border-dashed rounded-lg border-gray-200 dark:border-gray-700 mt-14">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
+          Dashboard Thống kê
+        </h1>
+        {loading ? (
+          <div className="text-center text-gray-500 dark:text-gray-300 py-12">Đang tải dữ liệu...</div>
+        ) : (
+          <>
+            {/* Statistic cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <StatCard label="Tổng phim" value={summary.totalMovies} color="blue" />
+              <StatCard label="Tổng user" value={summary.totalUsers} color="green" />
+              <StatCard label="Tổng tập phim" value={summary.totalEpisodes} color="purple" />
+              <StatCard label="Tổng comment" value={summary.totalComments} color="orange" />
+              <StatCard label="Tổng rating" value={summary.totalRatings} color="indigo" />
+              <StatCard label="Rating trung bình" value={summary.averageRating} color="yellow" />
+            </div>
 
-        {/* Charts Row 1 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-          {loading ? (
-            <>
-              <ChartSkeleton />
-              <ChartSkeleton />
-            </>
-          ) : (
-            <>
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-sm shadow">
-                <LineChart 
+            {/* Tỷ lệ hoàn thành xem phim */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6 flex flex-col items-center">
+              <h2 className="font-semibold mb-2">Tỷ lệ hoàn thành xem phim</h2>
+              <div className="text-3xl font-bold text-blue-600">
+                {completionRate.completionRate}%
+              </div>
+              <div className="text-gray-500 text-sm">
+                {completionRate.completedViews} lượt xem hoàn thành / {completionRate.totalEpisodes} tập phim
+              </div>
+            </div>
+
+            {/* Chart: Lượt xem & Thể loại */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+                <LineChart
                   title="Lượt xem theo tháng"
                   data={monthlyViews.map(item => ({
-                    name: `Tháng ${item.month}`,
-                    value: item.views
+                    month: item.month,
+                    views: item.count || item.views
                   }))}
                 />
               </div>
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-sm shadow">
-                <DonutChart 
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+                <DonutChart
                   title="Phân bố thể loại phim"
-                  data={genreDistribution}
+                  data={genreDistribution.map(item => ({
+                    name: item.name,
+                    value: item.movieCount || item.count
+                  }))}
                 />
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Recent Activity */}
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Hoạt động gần đây</h3>
-          {loading ? (
-            <ActivitySkeleton />
-          ) : (
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-sm shadow">
-              <div className="space-y-4">
-                {recentActivities.map((activity, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className={`bg-${activity.type === 'comment' ? 'blue' : 'yellow'}-100 dark:bg-${activity.type === 'comment' ? 'blue' : 'yellow'}-900 p-2 rounded-full`}>
-                        <svg className={`w-4 h-4 text-${activity.type === 'comment' ? 'blue' : 'yellow'}-600 dark:text-${activity.type === 'comment' ? 'blue' : 'yellow'}-300`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={activity.type === 'comment' ? "M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" : "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"} />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {activity.username} {activity.type === 'comment' ? 'đã bình luận về' : 'đã đánh giá'} {activity.movieTitle}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {activity.type === 'comment' ? activity.content : `${activity.rating}/5 ⭐`}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {new Date(activity.createdAt).toLocaleString('vi-VN')}
-                    </span>
-                  </div>
-                ))}
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Charts Row 2 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {loading ? (
-            <>
-              <ChartSkeleton />
-              <ChartSkeleton />
-            </>
-          ) : (
-            <>
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-sm shadow">
-                <BarChart 
-                  title="Top 5 phim xem nhiều nhất"
-                  data={topMovies}
+            {/* Chart: Top phim & Top user */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+                <BarChart
+                  title="Top phim xem nhiều nhất"
+                  data={topSeasons.map(item => ({
+                    name: item.title || (item.season && item.season.title) || "Không rõ",
+                    value: item.viewCount
+                  }))}
                 />
               </div>
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-sm shadow">
-                <RadialChart 
-                  title="Tỷ lệ hoàn thành xem phim"
-                  percentage={Number(completionRate.completionRate)}
-                  subtitle={`${completionRate.completedViews} lượt xem hoàn thành / ${completionRate.totalEpisodes} tập phim`}
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+                <BarChart
+                  title="Top user xem nhiều nhất"
+                  data={topUsers.map(item => ({
+                    name: item.user?.username || "Không rõ",
+                    value: item.viewCount
+                  }))}
                 />
               </div>
-            </>
-          )}
-        </div>
+            </div>
+
+            {/* Chart: Top phim yêu thích & rating cao */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+                <BarChart
+                  title="Top phim được yêu thích nhất"
+                  data={topFavoriteSeasons.map(item => ({
+                    name: item.season?.title || "Không rõ",
+                    value: item.favoriteCount
+                  }))}
+                />
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+                <BarChart
+                  title="Top phim rating cao nhất"
+                  data={topRatedSeasons.map(item => ({
+                    name: item.season?.title || "Không rõ",
+                    value: Number(item.avgRating)
+                  }))}
+                />
+              </div>
+            </div>
+
+            {/* Chart: Số lượng comment theo tháng & Pie user role */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+                <ColumnChart
+                  title="Số lượng comment theo tháng"
+                  data={commentsByMonth.map(item => ({
+                    name: `Tháng ${item.month}`,
+                    value: item.count
+                  }))}
+                />
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+                <PieChart
+                  title="Tỷ lệ user theo vai trò"
+                  data={userRoleDistribution.map(item => ({
+                    name: item.role,
+                    value: item.count
+                  }))}
+                />
+              </div>
+            </div>
+
+            {/* Datatable: User mới nhất */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6 overflow-x-auto">
+              <h2 className="font-semibold mb-2">Bảng: User mới nhất</h2>
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-2">#</th>
+                    <th className="px-4 py-2">Username</th>
+                    <th className="px-4 py-2">Email</th>
+                    <th className="px-4 py-2">Ngày đăng ký</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {newUsers.map((user, idx) => (
+                    <tr key={user.id}>
+                      <td className="px-4 py-2">{idx + 1}</td>
+                      <td className="px-4 py-2">{user.username}</td>
+                      <td className="px-4 py-2">{user.email}</td>
+                      <td className="px-4 py-2">{user.createdAt?.slice(0, 10)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Datatable: Phim mới nhất */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6 overflow-x-auto">
+              <h2 className="font-semibold mb-2">Bảng: Phim mới nhất</h2>
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-2">#</th>
+                    <th className="px-4 py-2">Tên phim</th>
+                    <th className="px-4 py-2">Ngày thêm</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {newSeasons.map((item, idx) => (
+                    <tr key={item.id}>
+                      <td className="px-4 py-2">{idx + 1}</td>
+                      <td className="px-4 py-2">{item.title}</td>
+                      <td className="px-4 py-2">{item.createdAt?.slice(0, 10)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

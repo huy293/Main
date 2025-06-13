@@ -95,6 +95,11 @@ const  loginUser = async (email, password) => {
     const user = await User.findOne({ where: { email } });
     if (!user) throw new Error("Người dùng không tồn tại.");
 
+    // Kiểm tra trạng thái tài khoản
+    if (user.status === 'locked') {
+      throw new Error("Tài khoản của bạn đã bị khóa.");
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new Error("Mật khẩu không đúng.");
 
@@ -108,7 +113,6 @@ const  loginUser = async (email, password) => {
         }
     );
     
-
     return { user, token };
   } catch (error) {
     throw new Error(error.message);

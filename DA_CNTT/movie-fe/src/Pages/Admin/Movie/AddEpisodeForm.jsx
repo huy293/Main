@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../../config/axios";
 
 const AddEpisodeForm = ({ season, mode, initialData, onClose, onReload }) => {
   const [formData, setFormData] = useState({
@@ -12,6 +12,7 @@ const AddEpisodeForm = ({ season, mode, initialData, onClose, onReload }) => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (mode === "edit" && initialData) {
@@ -52,42 +53,30 @@ const AddEpisodeForm = ({ season, mode, initialData, onClose, onReload }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
+
     if (!validateForm()) return;
 
-    setLoading(true);
     try {
-      if (mode === "edit") {
-        await axios.put(
-          `http://localhost:8888/api/episode/${initialData.id}`,
-          {
-            ...formData,
-            seasonId: season.value,
-          },
-          {
-            headers: { "Content-Type": "application/json" },
-            withCredentials: true,
-          }
-        );
+      if (mode === "edit" && initialData?.id) {
+        await axiosInstance.put(`/api/episode/${initialData.id}`, {
+          ...formData,
+          seasonId: season.value,
+        });
         alert("Cập nhật tập phim thành công!");
       } else {
-        await axios.post(
-          "http://localhost:8888/api/episode",
-          {
-            ...formData,
-            seasonId: season.value,
-          },
-          {
-            headers: { "Content-Type": "application/json" },
-            withCredentials: true,
-          }
-        );
+        await axiosInstance.post("/api/episode", {
+          ...formData,
+          seasonId: season.value,
+        });
         alert("Thêm tập phim thành công!");
       }
       onReload();
       onClose();
     } catch (error) {
-      console.error("Lỗi khi lưu tập phim:", error);
-      alert("Có lỗi xảy ra khi lưu tập phim");
+      console.error("Error:", error);
+      setError(error.response?.data?.error || "Có lỗi xảy ra, vui lòng thử lại");
     } finally {
       setLoading(false);
     }

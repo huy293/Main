@@ -1,31 +1,57 @@
-import React from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom";
-import { useState } from "react";
 import axiosInstance from "../../config/axios";
 
-const Register = ({ onClose, onLoginClick, onVerifyCodeClick }) => {
+const Register = ({ onClose, onLoginClick }) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
-    if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+    // Validate password
+    if (password.length < 6) {
+      setError("Mật khẩu phải có ít nhất 6 ký tự");
       return;
     }
 
-    try {
-      const response = await axiosInstance.post("/api/auth/register", { username, email, password });
+    if (password !== confirmPassword) {
+      setError("Mật khẩu xác nhận không khớp");
+      return;
+    }
 
-      if (response.status >= 200 && response.status < 300) {
-        onVerifyCodeClick();
+    setIsLoading(true);
+
+    try {
+      const response = await axiosInstance.post(
+        "/api/auth/register",
+        {
+          username,
+          email,
+          password,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (response.data.success) {
+        onLoginClick(); // Chuyển sang form đăng nhập sau khi đăng ký thành công
+      } else {
+        setError(response.data.message || "Đăng ký thất bại");
       }
     } catch (error) {
-      alert(error.message);
+      setError(error.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại.");
+    } finally {
+      setIsLoading(false);
     }
   };
+
   return ReactDOM.createPortal(
     <div
       tabIndex="-1"
@@ -40,7 +66,7 @@ const Register = ({ onClose, onLoginClick, onVerifyCodeClick }) => {
         <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
           <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Create a new account
+              Đăng ký tài khoản
             </h3>
             <button
               type="button"
@@ -66,13 +92,18 @@ const Register = ({ onClose, onLoginClick, onVerifyCodeClick }) => {
             </button>
           </div>
           <div className="p-4 md:p-5">
+            {error && (
+              <div className="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400">
+                {error}
+              </div>
+            )}
             <form className="space-y-4" action="#" onSubmit={handleSubmit}>
               <div>
                 <label
                   htmlFor="username"
                   className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                 >
-                  Username
+                  Tên người dùng
                 </label>
                 <input
                   type="text"
@@ -81,7 +112,7 @@ const Register = ({ onClose, onLoginClick, onVerifyCodeClick }) => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                  placeholder="Enter your username"
+                  placeholder="John Doe"
                   required
                 />
               </div>
@@ -90,7 +121,7 @@ const Register = ({ onClose, onLoginClick, onVerifyCodeClick }) => {
                   htmlFor="email"
                   className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                 >
-                  Your email
+                  Email
                 </label>
                 <input
                   type="email"
@@ -108,7 +139,7 @@ const Register = ({ onClose, onLoginClick, onVerifyCodeClick }) => {
                   htmlFor="password"
                   className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                 >
-                  Your password
+                  Mật khẩu
                 </label>
                 <input
                   type="password"
@@ -123,15 +154,15 @@ const Register = ({ onClose, onLoginClick, onVerifyCodeClick }) => {
               </div>
               <div>
                 <label
-                  htmlFor="confirmPassword"
+                  htmlFor="confirm-password"
                   className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                 >
-                  Confirm password
+                  Xác nhận mật khẩu
                 </label>
                 <input
                   type="password"
-                  name="confirmPassword"
-                  id="confirmPassword"
+                  name="confirm-password"
+                  id="confirm-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
@@ -139,38 +170,27 @@ const Register = ({ onClose, onLoginClick, onVerifyCodeClick }) => {
                   required
                 />
               </div>
-              <div className="flex justify-between">
-                <div className="flex items-start">
-                  <div className="flex items-center h-5">
-                    <input
-                      id="terms"
-                      type="checkbox"
-                      className="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-600 dark:border-gray-500 dark:focus:ring-blue-600"
-                      required
-                    />
-                  </div>
-                  <label
-                    htmlFor="terms"
-                    className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                  >
-                    I agree to the terms and conditions
-                  </label>
-                </div>
-              </div>
               <button
                 type="submit"
-                className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                disabled={isLoading}
+                className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Create an account
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Đang đăng ký...
+                  </div>
+                ) : (
+                  'Đăng ký'
+                )}
               </button>
               <div className="text-sm font-medium text-gray-500 dark:text-gray-300">
-                Already registered?{" "}
+                Đã có tài khoản?{" "}
                 <a
-                  href="#"
                   onClick={onLoginClick}
-                  className="text-blue-700 hover:underline dark:text-blue-500"
+                  className="text-blue-700 hover:underline dark:text-blue-500 cursor-pointer"
                 >
-                  Login
+                  Đăng nhập
                 </a>
               </div>
             </form>

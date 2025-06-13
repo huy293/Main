@@ -1,4 +1,5 @@
 const commentService = require("../services/comment.Service");
+const { Comment, User } = require("../models");
 
 exports.createComment = async (req, res) => {
   try {
@@ -23,7 +24,23 @@ exports.getAllComments = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+exports.replyToComment = async (req, res) => {
+    try {
+        const { commentId } = req.params;
+        const { content } = req.body;
+        const userId = req.user.id;
+        const reply = await commentService.createReply(commentId, content, userId);
 
+        // Lấy lại reply kèm thông tin User
+        const replyWithUser = await Comment.findByPk(reply.id, {
+            include: [{ model: User, attributes: ['id', 'username', 'avatar'] }]
+        });
+
+        res.status(201).json(replyWithUser);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
 exports.getCommentById = async (req, res) => {
   try {
     const comment = await commentService.getCommentById(req.params.id);
@@ -53,5 +70,30 @@ exports.deleteComment = async (req, res) => {
     res.json({ message: "Deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+exports.createSeasonComment = async (req, res) => {
+  try {
+    const { seasonId } = req.params;
+    const { content } = req.body;
+    const userId = req.user.id;
+
+    const comment = await Comment.create({
+      content,
+      userId,
+      seasonId
+    });
+
+    const newComment = await Comment.findByPk(comment.id, {
+      include: [{
+        model: User,
+        attributes: ['id', 'username', 'avatar']
+      }]
+    });
+
+    res.status(201).json(newComment);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

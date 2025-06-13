@@ -1,4 +1,4 @@
-const genreColumns = [
+const genreColumns = (onEdit, onDelete) => [
   {
     name: "Tên thể loại",
     selector: (row) => row.name,

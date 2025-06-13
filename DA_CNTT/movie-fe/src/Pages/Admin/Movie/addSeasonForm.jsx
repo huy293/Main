@@ -11,7 +11,6 @@ const AddSeasonForm = ({ movieId, mode = "add", initialData = null, onClose, onR
     poster_url: "",
     backdrop_url: "",
     trailer_url: "",
-    type: "Season",
     status: "upcoming",
     runtime: "",
     ...(initialData || {}),
@@ -48,17 +47,14 @@ const AddSeasonForm = ({ movieId, mode = "add", initialData = null, onClose, onR
         alert("Cập nhật mùa phim thành công!");
       } else {
         // Thêm season mới
-        await axiosInstance.post("/api/season", {
-          ...season,
-          movieId
-        });
+        await axiosInstance.post(`/api/season/${movieId}`, season);
         alert("Thêm mùa phim thành công!");
       }
       onReload();
       onClose();
     } catch (error) {
       console.error("Error:", error);
-      setError(error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại");
+      setError(error.response?.data?.error || "Có lỗi xảy ra, vui lòng thử lại");
     } finally {
       setLoading(false);
     }

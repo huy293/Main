@@ -1,4 +1,5 @@
 const movieGenreService = require("../services/movie_genre.Service");
+const { Log } = require("../models");
 
 exports.getAllGenres = async (req, res) => {
   try {
@@ -21,24 +22,30 @@ exports.getGenresOfMovie = async (req, res) => {
 };
 
 exports.updateMovieGenres = async (req, res) => {
-    try {
-      const movieId = req.params.movieId; // Lấy ID phim từ route
-      const genreIds = req.body.genreIds; // Lấy danh sách genreIds từ request body
-  
-      // Gọi service để xử lý cập nhật thể loại cho phim
-      await movieGenreService.updateMovieGenres(movieId, genreIds);
-  
-      // Trả về thông báo thành công
-      return res.status(200).json({
-        message: "Cập nhật thể loại phim thành công!",
-      });
-    } catch (error) {
-      // Xử lý lỗi nếu có
-      console.error(error);
-      return res.status(500).json({
-        message: "Đã có lỗi xảy ra khi cập nhật thể loại phim.",
+  try {
+    const movieId = req.params.movieId;
+    const genreIds = req.body.genreIds;
+
+    await movieGenreService.updateMovieGenres(movieId, genreIds);
+
+    // Ghi log nếu là admin
+    if (req.user && req.user.role === 'admin') {
+      await Log.create({
+        userId: req.user.id,
+        action: `Admin cập nhật thể loại cho movie ${movieId}: [${genreIds.join(", ")}]`,
+        time: new Date()
       });
     }
-  };
+
+    return res.status(200).json({
+      message: "Cập nhật thể loại phim thành công!",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Đã có lỗi xảy ra khi cập nhật thể loại phim.",
+    });
+  }
+};
 
 

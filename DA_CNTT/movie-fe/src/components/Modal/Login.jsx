@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom";
-import { useState } from "react";
 import axiosInstance from "../../config/axios";
 
 const Login = ({
@@ -11,21 +10,35 @@ const Login = ({
 }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await axiosInstance.post("/api/auth/login", { email, password });
+    setError("");
+    setIsLoading(true);
 
-      // Kiểm tra nếu không có lỗi từ server
+    try {
+      const response = await axiosInstance.post("/api/auth/login", { 
+        email, 
+        password 
+      }, {
+        withCredentials: true
+      });
+      
       if (response.status >= 200 && response.status < 300) {
         onLoginSuccess();
-        onClose(); // Đóng modal sau khi đăng nhập thành công
+        onClose();
+      } else {
+        setError(response.data.message || "Đăng nhập thất bại");
       }
     } catch (error) {
-      // Bắt lỗi dễ dàng hơn
-      alert(error.response?.data?.message || "Login failed!");
+      setError(error.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại.");
+    } finally {
+      setIsLoading(false);
     }
   };
+
   return ReactDOM.createPortal(
     <div
       tabIndex="-1"
@@ -40,7 +53,7 @@ const Login = ({
         <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
           <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Sign in to our platform
+              Đăng nhập
             </h3>
             <button
               type="button"
@@ -66,13 +79,18 @@ const Login = ({
             </button>
           </div>
           <div className="p-4 md:p-5">
+            {error && (
+              <div className="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400">
+                {error}
+              </div>
+            )}
             <form className="space-y-4" action="#" onSubmit={handleSubmit}>
               <div>
                 <label
                   htmlFor="email"
                   className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                 >
-                  Your email
+                  Email
                 </label>
                 <input
                   type="email"
@@ -90,7 +108,7 @@ const Login = ({
                   htmlFor="password"
                   className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                 >
-                  Your password
+                  Mật khẩu
                 </label>
                 <input
                   type="password"
@@ -116,29 +134,37 @@ const Login = ({
                     htmlFor="remember"
                     className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
                   >
-                    Remember me
+                    Ghi nhớ đăng nhập
                   </label>
                 </div>
                 <a
                   onClick={onForgotPasswordClick}
-                  className="text-sm text-blue-700 hover:underline dark:text-blue-500"
+                  className="text-sm text-blue-700 hover:underline dark:text-blue-500 cursor-pointer"
                 >
-                  Lost Password?
+                  Quên mật khẩu?
                 </a>
               </div>
               <button
                 type="submit"
-                className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                disabled={isLoading}
+                className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Login to your account
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Đang đăng nhập...
+                  </div>
+                ) : (
+                  'Đăng nhập'
+                )}
               </button>
               <div className="text-sm font-medium text-gray-500 dark:text-gray-300">
-                Not registered?{" "}
+                Chưa có tài khoản?{" "}
                 <a
                   onClick={onRegisterClick}
-                  className="text-blue-700 hover:underline dark:text-blue-500"
+                  className="text-blue-700 hover:underline dark:text-blue-500 cursor-pointer"
                 >
-                  Create account
+                  Đăng ký ngay
                 </a>
               </div>
             </form>

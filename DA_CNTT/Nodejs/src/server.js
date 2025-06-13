@@ -16,7 +16,7 @@ const favoriteRoutes = require("./routes/favorite.routes");
 const commentRoutes = require("./routes/comment.routes");
 const watchHistoryRoutes = require("./routes/watch_history.routes");
 const movieGenreRoutes = require("./routes/movie_genre.routes");
-const movieCastRoutes = require("./routes/movieCast.routes");
+const movieCastRoutes = require("./routes/movieActor.routes");
 const movieCrewRoutes = require("./routes/movieCrew.routes");
 const seasonRoutes = require("./routes/season.routes");
 const episodeRoutes = require("./routes/episode.routes");
@@ -44,6 +44,12 @@ app.use("/api/movie-crew", movieCrewRoutes);
 app.use("/api/season", seasonRoutes);
 app.use("/api/episode", episodeRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+
+// Cấu hình static files cho video
+app.use('/videos', express.static('uploads/videos'));
+// Cấu hình static files cho avatar
+app.use('/uploads', express.static('uploads'));
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);

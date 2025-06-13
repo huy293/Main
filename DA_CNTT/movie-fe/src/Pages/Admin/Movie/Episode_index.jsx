@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../../config/axios";
 import Datatables from "../../../components/Datatable/Datatables";
 import { Plus } from "lucide-react";
 import Select from "react-select";
@@ -20,14 +20,11 @@ const Episode = () => {
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const response = await axios.get("http://localhost:8888/api/movies", {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true,
-        });
+        const response = await axiosInstance.get("/api/movies");
         const seriesMovies = response.data.filter(movie => movie.type === "series");
         setMovies(seriesMovies);
       } catch (error) {
-        console.error("Lỗi khi tải danh sách phim:", error);
+        console.error("Error fetching movies:", error);
       }
     };
     fetchMovies();
@@ -40,16 +37,10 @@ const Episode = () => {
       return;
     }
     try {
-      const response = await axios.get(
-        `http://localhost:8888/api/season/movie/${movieId}`,
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true,
-        }
-      );
+      const response = await axiosInstance.get(`/api/season/movie/${movieId}`);
       setSeasons(response.data);
     } catch (error) {
-      console.error("Lỗi khi tải danh sách mùa phim:", error);
+      console.error("Error fetching seasons:", error);
       setSeasons([]);
     }
   };
@@ -62,22 +53,10 @@ const Episode = () => {
     }
     try {
       setLoading(true);
-      const response = await axios.get(
-        `http://localhost:8888/api/episode/season/${seasonId}`,
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true,
-        }
-      );
-      // Add handlers to each episode object
-      const episodesWithHandlers = response.data.map(episode => ({
-        ...episode,
-        onEdit: handleEditEpisode,
-        onDelete: handleDeleteEpisode
-      }));
-      setEpisodes(episodesWithHandlers);
+      const response = await axiosInstance.get(`/api/episode/season/${seasonId}`);
+      setEpisodes(response.data);
     } catch (error) {
-      console.error("Lỗi khi tải danh sách tập phim:", error);
+      console.error("Error fetching episodes:", error);
       setEpisodes([]);
     } finally {
       setLoading(false);
@@ -111,22 +90,23 @@ const Episode = () => {
   };
 
   // Handle Delete Episode
-  const handleDeleteEpisode = async (episode) => {
-    const confirmed = window.confirm(`Bạn có chắc muốn xóa tập "${episode.title}" không?`);
-    if (confirmed) {
+  const handleDeleteEpisode = async (episodeId) => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa tập phim này?")) {
       try {
-        await axios.delete(`http://localhost:8888/api/episode/${episode.id}`, {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true,
-        });
+        await axiosInstance.delete(`/api/episode/${episodeId}`);
         fetchEpisodes(selectedSeason.value);
-        alert("Xóa tập phim thành công!");
       } catch (error) {
-        console.error("Lỗi khi xóa tập phim:", error);
-        alert("Có lỗi xảy ra khi xóa tập phim");
+        console.error("Error deleting episode:", error);
       }
     }
   };
+
+  // Add handlers to episodes data
+  const episodesWithHandlers = episodes.map(episode => ({
+    ...episode,
+    onEdit: handleEditEpisode,
+    onDelete: handleDeleteEpisode
+  }));
 
   return (
     <div className="p-4 sm:ml-64 dark:bg-gray-900 min-h-screen">
@@ -262,7 +242,7 @@ const Episode = () => {
               <Datatables
                 key={episodes.map(e => e.id).join(",")}
                 columns={episodeColumns}
-                data={episodes}
+                data={episodesWithHandlers}
                 tableId="episode-table"
               />
             </div>

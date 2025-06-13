@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const watchHistoryController = require('../controllers/watch_history.Controller');
 const authMiddleware = require('../middleware/authMiddleware'); // middleware gán req.user
-router.use(authMiddleware("user")); // tất cả routes phải đăng nhập
+router.use(authMiddleware()); // tất cả routes phải đăng nhập
 // Route tạo mới lịch sử xem
 router.post('/', watchHistoryController.createWatchHistory);
 

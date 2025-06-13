@@ -24,7 +24,19 @@ exports.getCommentById = async (id) => {
     ],
   });
 };
+exports.createReply = async (parentId, content, userId) => {
+    // Lấy comment cha để lấy seasonId nếu cần
+    const parentComment = await Comment.findByPk(parentId); // Sửa ở đây
+    if (!parentComment) throw new Error("Comment not found");
 
+    const reply = await Comment.create({
+        content,
+        userId,
+        parentId,
+        seasonId: parentComment.seasonId,
+    });
+    return reply;
+};
 exports.updateComment = async (id, user, data) => {
   const comment = await Comment.findByPk(id);
   if (!comment) return null;

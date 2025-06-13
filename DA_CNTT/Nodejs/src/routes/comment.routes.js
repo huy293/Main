@@ -9,6 +9,8 @@ router.post("/", commentController.createComment);
 router.get("/", commentController.getAllComments);
 router.get("/:id", commentController.getCommentById);
 router.put("/:id", commentController.updateComment);
+router.post("/:commentId/reply", commentController.replyToComment);
 router.delete("/:id", commentController.deleteComment);
+router.post("/season/:seasonId", commentController.createSeasonComment);
 
 module.exports = router;

@@ -7,92 +7,83 @@ import { Pagination, Navigation } from "swiper/modules";
 import YouTube from "react-youtube";
 import { Gradient_outline_Blue, Gradient_outline_Red } from "./CustomButton/BT1";
 import Details from "./Modal/Details";
-const Banner = ({ MoviesList }) => {
-  
+
+const Banner = ({ SeasonsList }) => {
   const [trailers, setTrailers] = useState({});
   const [players, setPlayers] = useState({});
-  const [mutedSlides, setMutedSlides] = useState({}); // Lưu trạng thái mute của từng slide
+  const [mutedSlides, setMutedSlides] = useState({});
   const swiperRef = useRef(null);
 
-  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [selectedSeason, setSelectedSeason] = useState(null);
   const [isDetailModalOpen, setDetailModalOpen] = useState(false);
-  const openDetailModal = (movie) => {
-    setSelectedMovie(movie);
+
+  const openDetailModal = (season) => {
+    setSelectedSeason(season);
     setDetailModalOpen(true);
   };
 
   const closeModals = () => {
     setDetailModalOpen(false);
-    setSelectedMovie(null);
+    setSelectedSeason(null);
   };
+
   useEffect(() => {
     const fetchTrailers = async () => {
       const newTrailers = {};
-
       await Promise.all(
-        MoviesList.map(async (movie) => {
-          try {
-            const res = await fetch(
-              `https://api.themoviedb.org/3/movie/${movie.id}/videos`,
-              {
-                headers: {
-                  Authorization: `Bearer ${import.meta.env.VITE_API_TOKEN}`,
-                },
-              }
-            );
-            const data = await res.json();
-            const trailer = data.results.find(
-              (v) => v.type === "Trailer" && v.site === "YouTube"
-            );
-            if (trailer) newTrailers[movie.id] = trailer.key;
-          } catch (err) {
-            console.error("Lỗi lấy trailer:", err);
+        SeasonsList.map(async (season) => {
+          if (season.trailer_url) {
+            const videoId = season.trailer_url.split('v=')[1];
+            if (videoId) {
+              newTrailers[season.id] = videoId;
+            }
           }
         })
       );
-
       setTrailers(newTrailers);
     };
 
-    if (MoviesList?.length > 0) {
+    if (SeasonsList?.length > 0) {
       fetchTrailers();
     }
-  }, [MoviesList]);
+  }, [SeasonsList]);
 
-  const handlePlayerReady = (movieId) => (event) => {
+  const handlePlayerReady = (seasonId) => (event) => {
     const playerInstance = event.target;
     playerInstance.mute();
     playerInstance.playVideo();
 
-    setPlayers((prev) => ({ ...prev, [movieId]: playerInstance }));
-    setMutedSlides((prev) => ({ ...prev, [movieId]: true }));
+    setPlayers((prev) => ({ ...prev, [seasonId]: playerInstance }));
+    setMutedSlides((prev) => ({ ...prev, [seasonId]: true }));
   };
+
   const handleVideoEnd = () => {
     if (swiperRef.current && swiperRef.current.swiper) {
       swiperRef.current.swiper.slideNext();
     }
   };
 
-  const toggleMute = (movieId) => {
-    const player = players[movieId];
+  const toggleMute = (seasonId) => {
+    const player = players[seasonId];
     if (player) {
-      if (mutedSlides[movieId]) {
+      if (mutedSlides[seasonId]) {
         player.unMute();
       } else {
         player.mute();
       }
       setMutedSlides((prev) => ({
         ...prev,
-        [movieId]: !prev[movieId],
+        [seasonId]: !prev[seasonId],
       }));
     }
   };
+
   const handleSlideChange = (swiper) => {
     const currentIndex = swiper.activeIndex;
-    const currentMovie = MoviesList[currentIndex];
+    const currentSeason = SeasonsList[currentIndex];
 
-    Object.entries(players).forEach(([movieId, player]) => {
-      if (parseInt(movieId) === currentMovie?.id) {
+    Object.entries(players).forEach(([seasonId, player]) => {
+      if (parseInt(seasonId) === currentSeason?.id) {
         player.seekTo(0);
         player.playVideo();
       } else {
@@ -100,6 +91,7 @@ const Banner = ({ MoviesList }) => {
       }
     });
   };
+
   return (
     <Swiper
       className="w-full h-[100vh]"
@@ -110,13 +102,13 @@ const Banner = ({ MoviesList }) => {
       ref={swiperRef}
       onSlideChange={handleSlideChange}
     >
-      {MoviesList?.map((movie) => {
-        const trailerKey = trailers[movie.id];
-        const isMuted = mutedSlides[movie.id];
+      {SeasonsList?.map((season) => {
+        const trailerKey = trailers[season.id];
+        const isMuted = mutedSlides[season.id];
 
         return (
           <SwiperSlide
-            key={movie.id}
+            key={season.id}
             className="relative flex justify-center items-center"
           >
             {/* Video trailer */}
@@ -138,48 +130,47 @@ const Banner = ({ MoviesList }) => {
                     rel: 0,
                   },
                 }}
-                onReady={handlePlayerReady(movie.id)}
+                onReady={handlePlayerReady(season.id)}
                 onEnd={handleVideoEnd}
               />
             ) : (
               // Ảnh fallback
               <img
-                src={`${import.meta.env.VITE_API_URL_IMAGE_Banner}${movie.backdrop_path}`}
+                src={season.backdrop_url}
                 className="absolute w-full h-full object-cover"
-                alt={movie.title}
+                alt={season.title}
               />
             )}
 
             {/* Nút bật/tắt tiếng */}
             {trailerKey && (
               <div className="absolute bottom-16 right-1 z-20">
-              <Gradient_outline_Blue
-                content={isMuted ? "🔇 Tắt tiếng" : "🔊 Bật tiếng"}
-                onClick={() => toggleMute(movie.id)}
-              >             
-              </Gradient_outline_Blue>
+                <Gradient_outline_Blue
+                  content={isMuted ? "🔇 Tắt tiếng" : "🔊 Bật tiếng"}
+                  onClick={() => toggleMute(season.id)}
+                />
               </div>
             )}
 
             {/* Content */}
             <div className="absolute bottom-1/4 left-40 z-10 text-white max-w-xl text-left">
               <h2 className="text-4xl font-bold drop-shadow-lg">
-                {movie.title || movie.name}
+                {season.Movie?.title} - {season.title}
               </h2>
               <p className="text-lg mt-2 drop-shadow-md line-clamp-3">
-                {movie.overview}
+                {season.overview}
               </p>
               <div className="mt-4">
                 <Gradient_outline_Blue content={"Xem phim"} />
-                <Gradient_outline_Red onClick={() => openDetailModal(movie)} content={"Chi tiết"} />
+                <Gradient_outline_Red onClick={() => openDetailModal(season)} content={"Chi tiết"} />
               </div>
             </div>
           </SwiperSlide>
         );
       })}
-      {isDetailModalOpen && selectedMovie && (
-            <Details Movie={selectedMovie} onClose={closeModals} />
-          )}
+      {isDetailModalOpen && selectedSeason && (
+        <Details Season={selectedSeason} onClose={closeModals} />
+      )}
     </Swiper>
   );
 };

@@ -1,7 +1,6 @@
 const dashboardService = require('../services/dashboard.Service');
-const dashboardController = {
     // Lấy thống kê tổng quan
-    getStats: async (req, res) => {
+    exports.getStats = async (req, res) => {
         try {
             const stats = await dashboardService.getStats();
             res.json(stats);
@@ -11,10 +10,10 @@ const dashboardController = {
                 details: error.message
             });
         }
-    },
+    };
 
     // Lấy thống kê lượt xem theo tháng
-    getMonthlyViews: async (req, res) => {
+    exports.getMonthlyViews = async (req, res) => {
         try {
             const monthlyViews = await dashboardService.getMonthlyViews();
             res.json(monthlyViews);
@@ -24,10 +23,10 @@ const dashboardController = {
                 details: error.message
             });
         }
-    },
+    };
 
     // Lấy phân bố thể loại phim
-    getGenreDistribution: async (req, res) => {
+    exports.getGenreDistribution = async (req, res) => {
         try {
             const distribution = await dashboardService.getGenreDistribution();
             res.json(distribution);
@@ -37,10 +36,10 @@ const dashboardController = {
                 details: error.message
             });
         }
-    },
+    };
 
     // Lấy hoạt động gần đây
-    getRecentActivities: async (req, res) => {
+    exports.getRecentActivities = async (req, res) => {
         try {
             const activities = await dashboardService.getRecentActivities();
             res.json(activities);
@@ -50,23 +49,20 @@ const dashboardController = {
                 details: error.message
             });
         }
-    },
+    };
 
     // Lấy top phim
-    getTopMovies: async (req, res) => {
+    exports.getTopSeasons = async (req, res) => {
         try {
-            const topMovies = await dashboardService.getTopMovies();
-            res.json(topMovies);
+            const data = await dashboardService.getTopSeasons();
+            res.json(data);
         } catch (error) {
-            res.status(500).json({
-                error: 'Không thể lấy danh sách top phim',
-                details: error.message
-            });
+            res.status(500).json({ error: error.message });
         }
-    },
+    };
 
     // Lấy tỷ lệ hoàn thành
-    getCompletionRate: async (req, res) => {
+    exports.getCompletionRate = async (req, res) => {
         try {
             const completionRate = await dashboardService.getCompletionRate();
             res.json(completionRate);
@@ -76,7 +72,90 @@ const dashboardController = {
                 details: error.message
             });
         }
+    };
+    exports.getNewUsersByMonth = async (req, res) => {
+        try {
+            const data = await dashboardService.getNewUsersByMonth();
+            res.json(data);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    };
+
+    exports.getNewMoviesByMonth = async (req, res) => {
+        try {
+            const data = await dashboardService.getNewMoviesByMonth();
+            res.json(data);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    };
+
+    exports.getTopUsers = async (req, res) => {
+        try {
+            const data = await dashboardService.getTopUsers();
+            res.json(data);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    };
+
+    exports.getTopFavoriteMovies = async (req, res) => {
+        try {
+            const data = await dashboardService.getTopFavoriteMovies();
+            res.json(data);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    };
+
+    exports.getAverageRatingByGenre = async (req, res) => {
+        try {
+            const data = await dashboardService.getAverageRatingByGenre();
+            res.json(data);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    };
+
+    exports.getCommentsByMonth = async (req, res) => {
+        try {
+            const data = await dashboardService.getCommentsByMonth();
+            res.json(data);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    };
+
+    exports.getUserRoleDistribution = async (req, res) => {
+        try {
+            const data = await dashboardService.getUserRoleDistribution();
+            res.json(data);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    };
+exports.getNewestUsers = async (req, res) => {
+    try {
+        const data = await dashboardService.getNewestUsers();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 };
-
-module.exports = dashboardController; 
+exports.getNewestSeasons = async (req, res) => {
+    try {
+        const data = await dashboardService.getNewestSeasons();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+exports.getTopRatedSeasons = async (req, res) => {
+    try {
+        const data = await dashboardService.getTopRatedSeasons();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};

@@ -1,40 +1,48 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
+import axios from '../../../config/axios';
 import Datatables from "../../../components/Datatable/Datatables";
+
+// Danh sách từ khóa cấm
+const BAD_WORDS = [
+  "bậy", "tục", "địt", "lồn", "cặc", "đéo", "vkl", "vl", "cc", "ngu", "chửi", "fuck", "shit"
+];
+
+const containsBadWord = (content) => {
+  if (!content) return false;
+  const lower = content.toLowerCase();
+  return BAD_WORDS.some(word => lower.includes(word));
+};
 
 const Interaction = () => {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Lấy dữ liệu từ backend
   const fetchComments = useCallback(async () => {
     setLoading(true);
-    const data = [
-      {
-        id: 101,
-        user: "Nguyen Van A",
-        content: "Phim rất hay và hấp dẫn!",
-        relatedTo: "Phim: Avengers",
-        status: "pending",
-        createdAt: "2025-05-10",
-      },
-      {
-        id: 102,
-        user: "Tran Thi B",
-        content: "Sản phẩm này chất lượng tốt.",
-        relatedTo: "Sản phẩm: Tai nghe Bluetooth",
-        status: "approved",
-        createdAt: "2025-05-12",
-      },
-      {
-        id: 103,
-        user: "Le Van C",
-        content: "Tôi không hài lòng về dịch vụ.",
-        relatedTo: "Phim: Spider-Man",
-        status: "rejected",
-        createdAt: "2025-05-14",
-      },
-    ];
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    setComments(data);
+    try {
+      const res = await axios.get("/api/comment");
+      const data = res.data.map((c) => ({
+        id: c.id,
+        user: c.User?.username || c.user || "Ẩn danh",
+        content: c.content,
+        relatedTo: c.seasonId
+          ? `Mùa: ${c.Season?.title || c.seasonId}`
+          : c.movieId
+          ? `Phim: ${c.Movie?.title || c.movieId}`
+          : "",
+        createdAt: c.createdAt
+          ? new Date(c.createdAt)
+          : null,
+        createdAtStr: c.createdAt
+          ? new Date(c.createdAt).toLocaleString("vi-VN")
+          : "",
+      }));
+      setComments(data);
+    } catch (err) {
+      alert("Không thể tải bình luận từ server!");
+      setComments([]);
+    }
     setLoading(false);
   }, []);
 
@@ -42,90 +50,55 @@ const Interaction = () => {
     fetchComments();
   }, [fetchComments]);
 
-  const updateStatus = useCallback((id, newStatus) => {
-    setComments((prev) => {
-      const updated = [...prev];
-      const index = updated.findIndex((c) => c.id === id);
-      if (index !== -1) {
-        updated[index] = { ...updated[index], status: newStatus };
-      }
-      return updated;
-    });
-  }, []);
-
-  const deleteComment = useCallback((id) => {
-    if (window.confirm("Bạn có chắc muốn xóa bình luận này?")) {
+  // Xóa comment
+  const deleteComment = useCallback(async (id) => {
+    if (!window.confirm("Bạn có chắc muốn xóa bình luận này?")) return;
+    try {
+      await axios.delete(`/api/comment/${id}`);
       setComments((prev) => prev.filter((c) => c.id !== id));
       alert("Đã xóa bình luận");
+    } catch (err) {
+      alert("Không thể xóa bình luận!");
     }
   }, []);
 
+  // Cột cho bảng
   const columns = useMemo(
     () => [
       { name: "ID", selector: (row) => row.id },
       { name: "Người dùng", selector: (row) => row.user },
       { name: "Nội dung bình luận", selector: (row) => row.content },
       { name: "Liên quan đến", selector: (row) => row.relatedTo },
-      { name: "Ngày gửi", selector: (row) => row.createdAt },
-      {
-        name: "Trạng thái",
-        render: (row) => {
-          let bgColor = "bg-gray-500";
-          if (row.status === "approved") bgColor = "bg-green-500";
-          else if (row.status === "pending") bgColor = "bg-orange-500";
-          else if (row.status === "rejected") bgColor = "bg-red-500";
-          return (
-            <span
-              className={`${bgColor} px-2 py-1 rounded text-white capitalize whitespace-nowrap`}
-            >
-              {row.status}
-            </span>
-          );
-        },
-      },
+      { name: "Ngày gửi", selector: (row) => row.createdAtStr },
       {
         name: "Thao tác",
         render: (row) => (
-          <div className="flex flex-wrap gap-2">
-            {row.status !== "approved" && (
-              <button
-                onClick={() => updateStatus(row.id, "approved")}
-                className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm whitespace-nowrap"
-              >
-                Duyệt
-              </button>
-            )}
-            {row.status !== "rejected" && (
-              <button
-                onClick={() => updateStatus(row.id, "rejected")}
-                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm whitespace-nowrap"
-              >
-                Từ chối
-              </button>
-            )}
-            <button
-              onClick={() => deleteComment(row.id)}
-              className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 text-sm whitespace-nowrap"
-            >
-              Xóa
-            </button>
-          </div>
+          <button
+            onClick={() => deleteComment(row.id)}
+            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm whitespace-nowrap"
+          >
+            Xóa
+          </button>
         ),
       },
     ],
-    [updateStatus, deleteComment]
+    [deleteComment]
   );
-  
 
-  const pendingComments = comments.filter((c) => c.status === "pending");
-  const reviewedComments = comments.filter(
-    (c) => c.status === "approved" || c.status === "rejected"
+  // Lọc bình luận mới nhất trong 7 ngày
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const recentComments = comments.filter(
+    (c) => c.createdAt && c.createdAt >= sevenDaysAgo
   );
+
+  // Lọc bình luận tục tĩu/bậy bạ
+  const badComments = comments.filter((c) => containsBadWord(c.content));
 
   return (
     <div className="p-4 sm:ml-64 dark:bg-gray-900 min-h-screen space-y-12">
       <h1 className="text-3xl font-semibold text-white mb-6">
-        Quản lý Tương tác
+        Quản lý bình luận
       </h1>
       {loading ? (
         <div className="flex justify-center items-center h-48 text-white">
@@ -135,19 +108,19 @@ const Interaction = () => {
         <>
           <section>
             <h2 className="text-xl font-semibold text-white mb-4">
-              Bình luận đang chờ duyệt
+              Bình luận mới nhất trong 7 ngày
             </h2>
             <div className="overflow-x-auto rounded-lg border border-gray-700">
-              <Datatables data={pendingComments} columns={columns} />
+              <Datatables data={recentComments} columns={columns} />
             </div>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-4">
-              Bình luận đã duyệt hoặc từ chối
+              Bình luận có nội dung tục tĩu/bậy bạ
             </h2>
             <div className="overflow-x-auto rounded-lg border border-gray-700">
-              <Datatables data={reviewedComments} columns={columns} />
+              <Datatables data={badComments} columns={columns} />
             </div>
           </section>
         </>

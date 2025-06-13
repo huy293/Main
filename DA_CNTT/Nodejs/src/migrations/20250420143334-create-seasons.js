@@ -39,10 +39,6 @@ module.exports = {
         defaultValue: 'upcoming',
         allowNull: false,
       },
-      rating: {
-        type: Sequelize.FLOAT,
-        defaultValue: 0,
-      },
       runtime: {
         type: Sequelize.INTEGER,
       },

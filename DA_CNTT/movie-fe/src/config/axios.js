@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { API_URL } from './config';
 
-const instance = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8888',
+const axiosInstance = axios.create({
+    baseURL: API_URL,
     withCredentials: true,
     headers: {
         'Content-Type': 'application/json'
@@ -9,7 +10,7 @@ const instance = axios.create({
 });
 
 // Add a request interceptor
-instance.interceptors.request.use(
+axiosInstance.interceptors.request.use(
     (config) => {
         // Do something before request is sent
         return config;
@@ -21,19 +22,14 @@ instance.interceptors.request.use(
 );
 
 // Add a response interceptor
-instance.interceptors.response.use(
+axiosInstance.interceptors.response.use(
     (response) => {
         // Any status code that lie within the range of 2xx cause this function to trigger
         return response;
     },
     (error) => {
-        // Handle 401 Unauthorized
-        if (error.response && error.response.status === 401) {
-            // Redirect to login or handle unauthorized access
-            window.location.href = '/admin/login';
-        }
         return Promise.reject(error);
     }
 );
 
-export default instance; 
+export default axiosInstance; 

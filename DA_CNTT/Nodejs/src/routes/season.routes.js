@@ -3,21 +3,23 @@ const router = express.Router();
 const controller = require("../controllers/season.Controller");
 const authMiddleware = require("../middleware/authMiddleware");
 
-router.use(authMiddleware(["admin", "moderator"]));
-
-// Tạo mùa phim mới cho một movie
-router.post("/:movieId", controller.createSeason);
-
-// Lấy tất cả các mùa của một movie
+// Public routes
+router.get("/trending", controller.getTrendingSeasons);
+router.get("/popular", controller.getPopularSeasons);
+router.get("/top-rated", controller.getTopRatedSeasons);
+router.get("/upcoming", controller.getUpcomingSeasons);
+router.get("/now-playing", controller.getNowPlayingSeasons);
+router.get("/by-genre/:genre", controller.getSeasonsByGenre);
+router.get("/by-type", controller.getSeasonsByType);
+router.get("/search", controller.searchSeasons);
 router.get("/movie/:movieId", controller.getSeasonsByMovie);
-
-// Lấy chi tiết một mùa phim
+router.get("/:id/comments", controller.getSeasonComments);
+router.get("/:id/related", controller.getRelatedSeasons);
 router.get("/:id", controller.getSeasonById);
 
-// Cập nhật mùa phim
-router.put("/:id", controller.updateSeason);
-
-// Xóa mùa phim
-router.delete("/:id", controller.deleteSeason);
+// Protected routes
+router.post("/:movieId", authMiddleware(["admin", "moderator"]), controller.createSeason);
+router.put("/:id", authMiddleware(["admin", "moderator"]), controller.updateSeason);
+router.delete("/:id", authMiddleware(["admin"]), controller.deleteSeason);
 
 module.exports = router;

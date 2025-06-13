@@ -1,7 +1,29 @@
-import React from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom";
+import axiosInstance from "../../services/axiosInstance";
 
-const ForgotPassword = ({ onClose, onLoginClick }) => {
+const ForgotPassword = ({ onClose, onLoginClick, onVerifyCodeClick }) => {
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axiosInstance.post("/api/auth/forgot-password", { email });
+      
+      if (response.status >= 200 && response.status < 300) {
+        setSuccess(true);
+        // Lưu email để sử dụng trong verify code
+        localStorage.setItem('verifyEmail', email);
+        // Chuyển sang màn verify code
+        onVerifyCodeClick();
+      }
+    } catch (error) {
+      setError(error.response?.data?.message || "Có lỗi xảy ra khi gửi yêu cầu");
+    }
+  };
+
   return ReactDOM.createPortal(
     <div
       tabIndex="-1"
@@ -42,7 +64,9 @@ const ForgotPassword = ({ onClose, onLoginClick }) => {
             </button>
           </div>
           <div className="p-4 md:p-5">
-            <form className="space-y-4" action="#">
+            <form className="space-y-4" action="#" onSubmit={handleSubmit}>
+              {error && <div className="text-red-500 text-sm">{error}</div>}
+              {success && <div className="text-green-500 text-sm">Đã gửi mã xác thực đến email của bạn</div>}
               <div>
                 <label
                   htmlFor="email"
@@ -57,6 +81,8 @@ const ForgotPassword = ({ onClose, onLoginClick }) => {
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                   placeholder="name@company.com"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <button

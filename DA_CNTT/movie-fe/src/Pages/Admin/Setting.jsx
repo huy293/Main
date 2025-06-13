@@ -1,449 +1,115 @@
-import React, { useState } from "react";
-import {
-  FaCog,
-  FaEnvelope,
-  FaBell,
-  FaPalette,
-  FaUserShield,
-  FaGlobe,
-} from "react-icons/fa";
-import { MdSearch } from "react-icons/md";
-
-const WebsiteInfo = () => {
-  const [siteName, setSiteName] = useState("");
-  const [siteDescription, setSiteDescription] = useState("");
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert(`Lưu Thông tin Website: ${siteName}, ${siteDescription}`);
-  };
-
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow mt-6"
-    >
-      <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
-        Thông tin Website
-      </h2>
-      <div className="mb-4">
-        <label
-          htmlFor="siteName"
-          className="block mb-2 text-gray-700 dark:text-gray-300"
-        >
-          Tên website
-        </label>
-        <input
-          id="siteName"
-          type="text"
-          value={siteName}
-          onChange={(e) => setSiteName(e.target.value)}
-          placeholder="Nhập tên website"
-          className="w-full p-2 border border-gray-300 rounded dark:bg-gray-700 dark:text-white"
-          required
-        />
-      </div>
-      <div className="mb-4">
-        <label
-          htmlFor="siteDescription"
-          className="block mb-2 text-gray-700 dark:text-gray-300"
-        >
-          Mô tả website
-        </label>
-        <textarea
-          id="siteDescription"
-          value={siteDescription}
-          onChange={(e) => setSiteDescription(e.target.value)}
-          placeholder="Nhập mô tả ngắn về website"
-          className="w-full p-2 border border-gray-300 rounded dark:bg-gray-700 dark:text-white"
-          rows={4}
-          required
-        />
-      </div>
-      <button
-        type="submit"
-        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-      >
-        Lưu
-      </button>
-    </form>
-  );
-};
-
-
-const SEOSettings = () => {
-  const [metaTitle, setMetaTitle] = useState("");
-  const [metaDescription, setMetaDescription] = useState("");
-  const [robotsTxt, setRobotsTxt] = useState("");
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert(
-      `Lưu SEO: metaTitle=${metaTitle}, metaDescription=${metaDescription}, robotsTxt=${robotsTxt}`
-    );
-  };
-
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow mt-6"
-    >
-      <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
-        Cấu hình SEO
-      </h2>
-      <div className="mb-4">
-        <label
-          htmlFor="metaTitle"
-          className="block mb-2 text-gray-700 dark:text-gray-300"
-        >
-          Meta Title
-        </label>
-        <input
-          id="metaTitle"
-          type="text"
-          value={metaTitle}
-          onChange={(e) => setMetaTitle(e.target.value)}
-          placeholder="Nhập meta title"
-          className="w-full p-2 border border-gray-300 rounded dark:bg-gray-700 dark:text-white"
-          required
-        />
-      </div>
-
-      <div className="mb-4">
-        <label
-          htmlFor="metaDescription"
-          className="block mb-2 text-gray-700 dark:text-gray-300"
-        >
-          Meta Description
-        </label>
-        <textarea
-          id="metaDescription"
-          value={metaDescription}
-          onChange={(e) => setMetaDescription(e.target.value)}
-          placeholder="Nhập meta description"
-          rows={3}
-          className="w-full p-2 border border-gray-300 rounded dark:bg-gray-700 dark:text-white"
-          required
-        />
-      </div>
-
-      <div className="mb-4">
-        <label
-          htmlFor="robotsTxt"
-          className="block mb-2 text-gray-700 dark:text-gray-300"
-        >
-          Robots.txt
-        </label>
-        <textarea
-          id="robotsTxt"
-          value={robotsTxt}
-          onChange={(e) => setRobotsTxt(e.target.value)}
-          placeholder="Nội dung robots.txt"
-          rows={5}
-          className="w-full p-2 border border-gray-300 rounded dark:bg-gray-700 dark:text-white"
-        />
-      </div>
-
-      <button
-        type="submit"
-        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-      >
-        Lưu SEO
-      </button>
-    </form>
-  );
-};
-
-
-const EmailSettings = () => {
-  const [smtpServer, setSmtpServer] = useState("");
-  const [smtpPort, setSmtpPort] = useState(587);
-  const [emailFrom, setEmailFrom] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert(
-      `Lưu Email: Server=${smtpServer}, Port=${smtpPort}, EmailFrom=${emailFrom}`
-    );
-  };
-
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow mt-6"
-    >
-      <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
-        Cấu hình Email
-      </h2>
-
-      <div className="mb-4">
-        <label
-          htmlFor="smtpServer"
-          className="block mb-2 text-gray-700 dark:text-gray-300"
-        >
-          SMTP Server
-        </label>
-        <input
-          id="smtpServer"
-          type="text"
-          value={smtpServer}
-          onChange={(e) => setSmtpServer(e.target.value)}
-          placeholder="smtp.example.com"
-          className="w-full p-2 border border-gray-300 rounded dark:bg-gray-700 dark:text-white"
-          required
-        />
-      </div>
-
-      <div className="mb-4">
-        <label
-          htmlFor="smtpPort"
-          className="block mb-2 text-gray-700 dark:text-gray-300"
-        >
-          SMTP Port
-        </label>
-        <input
-          id="smtpPort"
-          type="number"
-          value={smtpPort}
-          onChange={(e) => setSmtpPort(Number(e.target.value))}
-          className="w-full p-2 border border-gray-300 rounded dark:bg-gray-700 dark:text-white"
-          required
-          min={1}
-        />
-      </div>
-
-      <div className="mb-4">
-        <label
-          htmlFor="emailFrom"
-          className="block mb-2 text-gray-700 dark:text-gray-300"
-        >
-          Email gửi đi
-        </label>
-        <input
-          id="emailFrom"
-          type="email"
-          value={emailFrom}
-          onChange={(e) => setEmailFrom(e.target.value)}
-          placeholder="your-email@example.com"
-          className="w-full p-2 border border-gray-300 rounded dark:bg-gray-700 dark:text-white"
-          required
-        />
-      </div>
-
-      <div className="mb-4">
-        <label
-          htmlFor="password"
-          className="block mb-2 text-gray-700 dark:text-gray-300"
-        >
-          Mật khẩu SMTP
-        </label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Nhập mật khẩu SMTP"
-          className="w-full p-2 border border-gray-300 rounded dark:bg-gray-700 dark:text-white"
-          required
-        />
-      </div>
-
-      <button
-        type="submit"
-        className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded"
-      >
-        Lưu cấu hình Email
-      </button>
-    </form>
-  );
-};
-
-
-
-const NotificationSettings = () => {
-  const [enablePush, setEnablePush] = useState(false);
-  const [enableEmail, setEnableEmail] = useState(true);
-  const [alertThreshold, setAlertThreshold] = useState(80);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert(
-      `Lưu Thông báo: Push=${enablePush}, Email=${enableEmail}, Ngưỡng cảnh báo=${alertThreshold}%`
-    );
-  };
-
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow mt-6"
-    >
-      <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
-        Thông báo hệ thống
-      </h2>
-
-      <div className="mb-4 flex items-center gap-4">
-        <input
-          id="enablePush"
-          type="checkbox"
-          checked={enablePush}
-          onChange={(e) => setEnablePush(e.target.checked)}
-          className="w-5 h-5"
-        />
-        <label
-          htmlFor="enablePush"
-          className="text-gray-700 dark:text-gray-300 select-none"
-        >
-          Bật thông báo đẩy (Push Notification)
-        </label>
-      </div>
-
-      <div className="mb-4 flex items-center gap-4">
-<input
-id="enableEmail"
-type="checkbox"
-checked={enableEmail}
-onChange={(e) => setEnableEmail(e.target.checked)}
-className="w-5 h-5"
-/>
-<label htmlFor="enableEmail" className="text-gray-700 dark:text-gray-300 select-none" >
-Bật thông báo qua email
-</label>
-</div>  <div className="mb-4">
-    <label
-      htmlFor="alertThreshold"
-      className="block mb-2 text-gray-700 dark:text-gray-300"
-    >
-      Ngưỡng cảnh báo (%)
-    </label>
-    <input
-      id="alertThreshold"
-      type="number"
-      value={alertThreshold}
-      onChange={(e) => setAlertThreshold(Number(e.target.value))}
-      min={0}
-      max={100}
-      className="w-full p-2 border border-gray-300 rounded dark:bg-gray-700 dark:text-white"
-    />
-  </div>
-
-  <button
-    type="submit"
-    className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded"
-  >
-    Lưu cài đặt thông báo
-  </button>
-</form>
-  );
-};
-
-
-
-const ThemeSettings = () => {
-  const [theme, setTheme] = useState("light");
-  const [primaryColor, setPrimaryColor] = useState("#3b82f6");
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert(`Lưu Theme: ${theme}, màu chính: ${primaryColor}`);
-  };
-
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow mt-6"
-    >
-      <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
-        Cài đặt giao diện
-      </h2>
-
-      <div className="mb-4">
-        <label
-          htmlFor="themeSelect"
-          className="block mb-2 text-gray-700 dark:text-gray-300"
-        >
-          Chọn chủ đề
-        </label>
-        <select
-          id="themeSelect"
-          value={theme}
-          onChange={(e) => setTheme(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded dark:bg-gray-700 dark:text-white"
-        >
-          <option value="light">Sáng</option>
-          <option value="dark">Tối</option>
-          <option value="system">Theo hệ thống</option>
-        </select>
-      </div>
-
-      <div className="mb-4">
-        <label
-          htmlFor="primaryColor"
-          className="block mb-2 text-gray-700 dark:text-gray-300"
-        >
-          Màu chính
-        </label>
-        <input
-          id="primaryColor"
-          type="color"
-          value={primaryColor}
-          onChange={(e) => setPrimaryColor(e.target.value)}
-          className="w-16 h-10 p-0 border-none rounded cursor-pointer"
-        />
-      </div>
-
-      <button
-        type="submit"
-        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded"
-      >
-        Lưu giao diện
-      </button>
-    </form>
-  );
-};
+import React, { useState, useEffect } from "react";
+import Select from "react-select";
+import axios from "../../config/axios";
+import dayjs from "dayjs";
 
 const AdminSettings = () => {
-  const [admins, setAdmins] = useState([
-    { id: 1, email: "admin1@example.com", role: "Admin" },
-    { id: 2, email: "mod1@example.com", role: "Moderator" },
-  ]);
-  const [newEmail, setNewEmail] = useState("");
-  const [newRole, setNewRole] = useState("Admin");
+  const [admins, setAdmins] = useState([]);
+  const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [logs, setLogs] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [permissions, setPermissions] = useState({});
+  const [showLogModal, setShowLogModal] = useState(false);
+  const [showNotifyModal, setShowNotifyModal] = useState(false);
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [selectedAdmin, setSelectedAdmin] = useState(null);
 
-  // Thêm admin mới
-  const handleAddAdmin = (e) => {
-    e.preventDefault();
-    if (!newEmail) return alert("Vui lòng nhập email");
-    if (admins.find((a) => a.email === newEmail))
-      return alert("Email đã tồn tại");
-    const newAdmin = {
-      id: Date.now(),
-      email: newEmail,
-      role: newRole,
-    };
-    setAdmins((prev) => [...prev, newAdmin]);
-    setNewEmail("");
-    setNewRole("Admin");
+  useEffect(() => {
+    fetchAdmins();
+  }, []);
+
+  const fetchAdmins = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('/api/user/admins');
+      setAdmins(response.data); // response.data là mảng user
+    } catch (error) {
+      setError(error.response?.data?.message || 'Lỗi khi lấy danh sách admin');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Thay đổi quyền admin
-  const handleChangeRole = (id) => {
-    setAdmins((prev) =>
-      prev.map((admin) =>
-        admin.id === id
-          ? {
-              ...admin,
-              role: admin.role === "Admin" ? "Moderator" : "Admin",
-            }
-          : admin
-      )
-    );
+  const handleChangeRole = (user) => {
+    setSelectedUser(user);
+    setIsRoleModalOpen(true);
   };
 
-  // Xóa admin
-  const handleDelete = (id) => {
-    if (window.confirm("Bạn có chắc muốn xóa admin này?")) {
-      setAdmins((prev) => prev.filter((admin) => admin.id !== id));
+  const handleRoleSubmit = async (newRole) => {
+    try {
+      const response = await axios.post(`/api/user/changerole/${selectedUser.id}`, {
+        role: newRole
+      });
+      alert(response.data.message);
+      setIsRoleModalOpen(false);
+      setSelectedUser(null);
+      fetchAdmins();
+    } catch (err) {
+      alert(err.response?.data?.message || "Không thể thay đổi quyền người dùng");
+    }
+  };
+  const handleToggleLock = async (user) => {
+    if (user.role === "admin") {
+      alert("Không thể khóa tài khoản admin!");
+      return;
+    }
+    if (!window.confirm(`Bạn có chắc muốn ${user.status === "locked" ? "mở khóa" : "khóa"} tài khoản này?`)) return;
+    try {
+      await axios.put(`/api/user/toggle-lock/${user.id}`);
+      fetchAdmins();
+    } catch (err) {
+      alert(err.response?.data?.message || "Không thể thay đổi trạng thái tài khoản");
+    }
+  };
+  if (loading) return <div className="p-8 text-center text-white">Loading...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+
+  const roleOptions = [
+    { value: "moderator", label: "Moderator" },
+    { value: "admin", label: "Admin" },
+    { value: "user", label: "User" }
+  ];
+  const fetchLogs = async (userId) => {
+    try {
+      const res = await axios.get(`/api/user/logs/${userId}`);
+      setLogs(res.data);
+      setShowLogModal(true);
+    } catch {
+      alert("Không thể lấy lịch sử hoạt động!");
+    }
+  };
+
+  // Lấy thông báo hệ thống
+  const fetchNotifications = async () => {
+    try {
+      const res = await axios.get("/api/notification/admin");
+      setNotifications(res.data);
+      setShowNotifyModal(true);
+    } catch {
+      alert("Không thể lấy thông báo hệ thống!");
+    }
+  };
+
+  // Lấy và cập nhật phân quyền chi tiết
+  const fetchPermissions = async (userId) => {
+    try {
+      const res = await axios.get(`/api/user/permissions/${userId}`);
+      setPermissions(res.data);
+      setSelectedAdmin(userId);
+      setShowPermissionModal(true);
+    } catch {
+      alert("Không thể lấy phân quyền!");
+    }
+  };
+  const handlePermissionChange = async (perm, value) => {
+    try {
+      await axios.put(`/api/user/permissions/${selectedAdmin}`, { [perm]: value });
+      setPermissions((prev) => ({ ...prev, [perm]: value }));
+    } catch {
+      alert("Không thể cập nhật phân quyền!");
     }
   };
 
@@ -453,55 +119,16 @@ const AdminSettings = () => {
         Quản lý Admin & Moderator
       </h2>
 
-      {/* Form thêm admin mới */}
-      <form onSubmit={handleAddAdmin} className="mb-6">
-        <div className="mb-4">
-          <label
-            htmlFor="newEmail"
-            className="block mb-2 text-gray-700 dark:text-gray-300"
-          >
-            Email admin mới
-          </label>
-          <input
-            id="newEmail"
-            type="email"
-            value={newEmail}
-            onChange={(e) => setNewEmail(e.target.value)}
-            placeholder="admin@example.com"
-            className="w-full p-2 border border-gray-300 rounded dark:bg-gray-700 dark:text-white"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label
-            htmlFor="newRole"
-            className="block mb-2 text-gray-700 dark:text-gray-300"
-          >
-            Quyền
-          </label>
-          <select
-            id="newRole"
-            value={newRole}
-            onChange={(e) => setNewRole(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded dark:bg-gray-700 dark:text-white"
-          >
-            <option value="Admin">Admin</option>
-            <option value="Moderator">Moderator</option>
-          </select>
-        </div>
+      <div className="mb-4 flex gap-3">
         <button
-          type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+          onClick={fetchNotifications}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
         >
-          Thêm Admin
+          Xem thông báo hệ thống
         </button>
-      </form>
+      </div>
 
-      {/* Danh sách Admin */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-3">
-          Danh sách Admin & Moderator
-        </h3>
+      <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-gray-300 dark:border-gray-600">
@@ -511,29 +138,53 @@ const AdminSettings = () => {
             </tr>
           </thead>
           <tbody>
-            {admins.map(({ id, email, role }) => (
+            {admins.map((user) => (
               <tr
-                key={id}
+                key={user.id}
                 className="border-b border-gray-200 dark:border-gray-700"
               >
                 <td className="py-2 px-3 text-gray-800 dark:text-gray-200">
-                  {email}
+                  {user.email}
                 </td>
                 <td className="py-2 px-3 text-gray-800 dark:text-gray-200">
-                  {role}
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs ${
+                      user.role === "admin"
+                        ? "bg-purple-100 text-purple-800"
+                        : "bg-blue-100 text-blue-800"
+                    }`}
+                  >
+                    {user.role === "admin" ? "Admin" : "Moderator"}
+                  </span>
                 </td>
-                <td className="py-2 px-3 flex gap-3">
+                <td className="py-2 px-3 flex gap-3 flex-wrap">
                   <button
-                    onClick={() => handleChangeRole(id)}
+                    onClick={() => handleChangeRole(user)}
                     className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
                   >
                     Phân quyền
                   </button>
                   <button
-                    onClick={() => handleDelete(id)}
-                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+                    onClick={() => handleToggleLock(user)}
+                    className={`${
+                      user.status === "locked"
+                        ? "bg-green-500 hover:bg-green-600"
+                        : "bg-red-500 hover:bg-red-600"
+                    } text-white px-3 py-1 rounded`}
                   >
-                    Xóa
+                    {user.status === "locked" ? "Mở khóa" : "Khóa"}
+                  </button>
+                  <button
+                    onClick={() => fetchLogs(user.id)}
+                    className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded"
+                  >
+                    Lịch sử hoạt động
+                  </button>
+                  <button
+                    onClick={() => fetchPermissions(user.id)}
+                    className="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded"
+                  >
+                    Phân quyền chi tiết
                   </button>
                 </td>
               </tr>
@@ -551,86 +202,165 @@ const AdminSettings = () => {
           </tbody>
         </table>
       </div>
-    </div>
-  );
-};
 
-
-const settingsList = [
-  {
-    title: "Thông tin Website",
-    icon: <FaGlobe className="w-6 h-6 text-blue-500" />,
-    component: WebsiteInfo,
-  },
-  {
-    title: "Cấu hình SEO",
-    icon: <MdSearch className="w-6 h-6 text-green-500" />,
-    component: SEOSettings,
-  },
-  {
-    title: "Cấu hình Email",
-    icon: <FaEnvelope className="w-6 h-6 text-yellow-500" />,
-    component: EmailSettings,
-  },
-  {
-    title: "Thông báo hệ thống",
-    icon: <FaBell className="w-6 h-6 text-red-500" />,
-    component: NotificationSettings,
-  },
-  {
-    title: "Giao diện & Logo",
-    icon: <FaPalette className="w-6 h-6 text-pink-500" />,
-    component: ThemeSettings,
-  },
-  {
-    title: "Quản lý Admin",
-    icon: <FaUserShield className="w-6 h-6 text-purple-500" />,
-    component: AdminSettings,
-  },
-];
-
-const Setting = () => {
-  const [selectedSetting, setSelectedSetting] = useState(settingsList[0]);
-
-  const handleSelectSetting = (item) => {
-    setSelectedSetting(item);
-  };
-
-  const SelectedComponent = selectedSetting ? selectedSetting.component : null;
-
-  return (
-    <div className="p-4 sm:ml-64 dark:bg-gray-900 min-h-screen">
-      <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
-        <h2 className="text-2xl font-semibold mb-6 text-gray-700 dark:text-white">
-          Cài đặt hệ thống
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {settingsList.map((item) => (
-            <div
-              key={item.title}
-              onClick={() => handleSelectSetting(item)}
-              className={`flex items-center gap-4 p-4 rounded-lg shadow cursor-pointer transition
-                ${
-                  selectedSetting === item
-                    ? "bg-blue-100 dark:bg-blue-900"
-                    : "bg-white dark:bg-gray-800 hover:shadow-md"
-                }`}
-            >
-              <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded-full">
-                {item.icon}
-              </div>
-              <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">
-                {item.title}
-              </h3>
+      {/* Modal: Lịch sử hoạt động */}
+      {showLogModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-lg">
+            <h2 className="text-lg font-bold mb-4 dark:text-white">Lịch sử hoạt động</h2>
+            <div className="max-h-72 overflow-y-auto">
+              {logs.length === 0 ? (
+                <div className="text-gray-500">Chưa có log nào</div>
+              ) : (
+                <ul className="space-y-2">
+                  {logs.map((log, idx) => (
+                    <li key={idx} className="text-sm text-gray-700 dark:text-gray-200">
+                      [{dayjs(log.time).format("HH:mm DD/MM/YYYY")}] {log.action}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-          ))}
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setShowLogModal(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
         </div>
+      )}
 
-        {/* Hiển thị component tương ứng */}
-        {SelectedComponent && <SelectedComponent />}
-      </div>
+      {/* Modal: Thông báo hệ thống */}
+      {showNotifyModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-lg">
+            <h2 className="text-lg font-bold mb-4 dark:text-white">Thông báo hệ thống</h2>
+            <div className="max-h-72 overflow-y-auto">
+              {notifications.length === 0 ? (
+                <div className="text-gray-500">Không có thông báo nào</div>
+              ) : (
+                <ul className="space-y-2">
+                  {notifications.map((n, idx) => (
+                    <li key={idx} className="text-sm text-gray-700 dark:text-gray-200">
+                      [{dayjs(n.time).format("HH:mm DD/MM/YYYY")}] {n.message}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setShowNotifyModal(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Phân quyền chi tiết */}
+      {showPermissionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-lg font-bold mb-4 dark:text-white">Phân quyền chi tiết</h2>
+            <div className="space-y-3">
+              {Object.keys(permissions).length === 0 ? (
+                <div className="text-gray-500">Không có dữ liệu phân quyền</div>
+              ) : (
+                Object.entries(permissions).map(([perm, value]) => (
+                  <div key={perm} className="flex items-center gap-3">
+                    <span className="w-40 capitalize">{perm}</span>
+                    <select
+                      value={value ? "yes" : "no"}
+                      onChange={e => handlePermissionChange(perm, e.target.value === "yes")}
+                      className="border rounded px-2 py-1"
+                    >
+                      <option value="yes">Có</option>
+                      <option value="no">Không</option>
+                    </select>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setShowPermissionModal(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ...existing modal for role change... */}
+      {isRoleModalOpen && selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4 dark:text-white">
+              Phân quyền người dùng
+            </h2>
+            <div className="mb-4">
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                Người dùng: {selectedUser.username}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                Email: {selectedUser.email}
+              </p>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Vai trò mới
+              </label>
+              <Select
+                options={[
+                  { value: "moderator", label: "Moderator" },
+                  { value: "admin", label: "Admin" },
+                  { value: "user", label: "User" }
+                ]}
+                value={[
+                  { value: "moderator", label: "Moderator" },
+                  { value: "admin", label: "Admin" },
+                  { value: "user", label: "User" }
+                ].find(option => option.value === selectedUser.role)}
+                onChange={(option) => handleRoleSubmit(option.value)}
+                className="basic-single"
+                classNamePrefix="select"
+                isClearable={false}
+                isSearchable={false}
+              />
+            </div>
+            <div className="flex justify-end">
+              <button
+                onClick={() => {
+                  setIsRoleModalOpen(false);
+                  setSelectedUser(null);
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
+const Setting = () => (
+  <div className="p-4 sm:ml-64 dark:bg-gray-900 min-h-screen">
+    <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
+      <h2 className="text-2xl font-semibold mb-6 text-gray-700 dark:text-white">
+        Quản lý Admin & Moderator
+      </h2>
+      <AdminSettings />
+    </div>
+  </div>
+);
 
 export default Setting;

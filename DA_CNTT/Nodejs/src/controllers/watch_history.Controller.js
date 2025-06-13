@@ -2,7 +2,8 @@ const watchHistoryService = require('../services/watch_history.Service');
 
 // 1. Tạo mới lịch sử xem phim
 exports.createWatchHistory = async (req, res) => {
-  const { userId, episodeId } = req.body;
+  const userId = req.user.id;
+  const { episodeId } = req.body;
 
   try {
     const newHistory = await watchHistoryService.createWatchHistory(userId, episodeId);

@@ -32,6 +32,18 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: 0 
       },
       runtime: { type: DataTypes.INTEGER },
+      viewCount: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+      },
+      favoriteCount: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+      },
+      movieId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      }
     });
     Season.associate = (models) => {
         Season.belongsTo(models.Movie, {
@@ -46,8 +58,16 @@ module.exports = (sequelize, DataTypes) => {
       Season.hasMany(models.Rating, { foreignKey: 'seasonId' });
       Season.hasMany(models.Favorite, { foreignKey: 'seasonId' });
       Season.hasMany(models.Comment, { foreignKey: 'seasonId' });
-      Season.belongsToMany(models.People, { through: models.MovieCast, foreignKey: 'seasonId' });
-      Season.belongsToMany(models.People, { through: models.MovieCrew, foreignKey: 'seasonId' });
+      Season.belongsToMany(models.People, { 
+        through: models.MovieActor, 
+        foreignKey: 'seasonId',
+        otherKey: 'peopleId'
+      });
+      Season.belongsToMany(models.People, { 
+        through: models.MovieCrew, 
+        foreignKey: 'seasonId',
+        otherKey: 'peopleId'
+      });
       };
     return Season;
   }

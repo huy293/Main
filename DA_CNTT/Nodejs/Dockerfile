@@ -25,4 +25,5 @@ JWT_EXPIRES_IN=\${JWT_EXPIRES_IN}" > .env
 
 EXPOSE 8888
 
+# Chạy ứng dụng trực tiếp
 CMD ["npm", "run", "dev"]

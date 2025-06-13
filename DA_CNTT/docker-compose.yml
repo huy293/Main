@@ -35,11 +35,14 @@ services:
       - /app/node_modules
 
   mysql:
-    image: mysql:8.0
+    image: mysql:8.0  # Đảm bảo khai báo đúng image cho MySQL
     container_name: mysql_server
     restart: always
-    env_file:
-      - ./Nodejs/.env
+    environment:
+      MYSQL_ROOT_PASSWORD: 29032003
+      MYSQL_DATABASE: HH_Movie
+      MYSQL_USER: huydev
+      MYSQL_PASSWORD: 22032003
     ports:
       - "3307:3306"
     volumes:
@@ -47,11 +50,11 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p22032003"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "mysql_server", "-u", "root", "-p29032003"]
       interval: 10s
       timeout: 5s
       retries: 5
-
+  
 networks:
   app-network:
     driver: bridge
